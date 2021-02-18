@@ -1,6 +1,8 @@
 #!/usr/bin/env gnuplot -c
 
+################################################################################
 # Generates a combined, non-interactive graph of the CSV files provided as arguments
+################################################################################
 
 # Show usage information if no argument is present
 if (strlen(ARG1) == 0 || strlen(ARG2) == 0) print "Usage: " . ARG0 . " lockdown.csv smackdown.csv"; exit
