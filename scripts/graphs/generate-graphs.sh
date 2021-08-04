@@ -1,7 +1,8 @@
 #!/bin/bash
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-. "$DIR/players.sh"
+. "$DIR/../players.sh"
+. "$DIR/../common.sh"
 . "$DIR/generate-plot-data.sh"
 
 # create temporary files
@@ -11,15 +12,15 @@ SMACKDOWN_TMP=$(mktemp /tmp/smackdown.XXXXXXXXXX) || { echo "Failed to create te
 SMACKDOWN_PLOT_DATA_TMP=$(mktemp /tmp/smackdown-plot-data.XXXXXXXXXX) || { echo "Failed to create temp file"; exit 1; }
 
 # find all table files for most recent game for both Lockdown and Smackdown games
-LOCKDOWN_TOURNAMENT_FILE_PATTERN=`ls -Art poker-mavens-data/HandHistory/*Lockdown* | tail -n 1 | grep -o "HH.*Lockdown"`
+LOCKDOWN_TOURNAMENT_FILE_PATTERN=`ls -Art $PM_DATA_HAND_HISTORY_DIR/*Lockdown* | tail -n 1 | grep -o "HH.*Lockdown"`
 LOCKDOWN_TOURNAMENT_FILE_PATTERN="${LOCKDOWN_TOURNAMENT_FILE_PATTERN}*"
-SMACKDOWN_TOURNAMENT_FILE_PATTERN=`ls -Art poker-mavens-data/HandHistory/*Smackdown* | tail -n 1 | grep -o "HH.*Smackdown"`
+SMACKDOWN_TOURNAMENT_FILE_PATTERN=`ls -Art $PM_DATA_HAND_HISTORY_DIR/*Smackdown* | tail -n 1 | grep -o "HH.*Smackdown"`
 SMACKDOWN_TOURNAMENT_FILE_PATTERN="${SMACKDOWN_TOURNAMENT_FILE_PATTERN}*"
 
 # dump all table files to a temp file and get sorted timestamp
-find poker-mavens-data/HandHistory/ -name "$LOCKDOWN_TOURNAMENT_FILE_PATTERN" -exec cat "{}" >> "$LOCKDOWN_TMP" +
+find $PM_DATA_HAND_HISTORY_DIR/ -name "$LOCKDOWN_TOURNAMENT_FILE_PATTERN" -exec cat "{}" >> "$LOCKDOWN_TMP" +
 LOCKDOWN_SORTED_HANDS=`egrep -h -e "Hand" $LOCKDOWN_TMP | awk '{print $4 " " $5}' | sort`
-find poker-mavens-data/HandHistory/ -name "$SMACKDOWN_TOURNAMENT_FILE_PATTERN" -exec cat "{}" >> "$SMACKDOWN_TMP" +
+find $PM_DATA_HAND_HISTORY_DIR/ -name "$SMACKDOWN_TOURNAMENT_FILE_PATTERN" -exec cat "{}" >> "$SMACKDOWN_TMP" +
 SMACKDOWN_SORTED_HANDS=`egrep -h -e "Hand" $SMACKDOWN_TMP | awk '{print $4 " " $5}' | sort`
 
 generatePlotData "$LOCKDOWN_TMP" "$LOCKDOWN_SORTED_HANDS" "$LOCKDOWN_PLOT_DATA_TMP"

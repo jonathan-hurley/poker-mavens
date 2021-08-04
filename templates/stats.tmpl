@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>_POKER_SITE_NAME_ Statistics</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=yes">
+  <link rel="icon" type="image/png" href="images/icons/mobile.png" />
+  <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+  <link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+  <link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
+  <link rel="stylesheet" type="text/css" href="css/util.css">
+  <link rel="stylesheet" type="text/css" href="css/main.css?v=1.0.10">
+  <link href='https://fonts.googleapis.com/css?family=Roboto Mono' rel='stylesheet'>
+</head>
+
+<body>
+  <div class="limiter">
+    <img class="logo" src="images/logo.png" />
+    <br/>
+    <div class="generation-date">_GENERATED_ON_</div>
+    <div class="container-table100">
+      <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical" style="padding-right:10px">
+        <a class="nav-link active" id="v-pills-player-tournament-tab" data-toggle="pill" href="#v-pills-player-tournament" role="tab" aria-controls="v-pills-player-tournament" aria-selected="true">Player Tournament</a>
+        <a class="nav-link" id="v-pills-player-cash-tab" data-toggle="pill" href="#v-pills-player-cash" role="tab" aria-controls="v-pills-player-cash" aria-selected="false">Player Cash</a>
+        <a class="nav-link" id="v-pills-player-pp-tab" data-toggle="pill" href="#v-pills-player-pp" role="tab" aria-controls="v-pills-player-pp" aria-selected="false">Player Pocket Pairs</a>
+        <a class="nav-link" id="v-pills-site-tab" data-toggle="pill" href="#v-pills-site" role="tab" aria-controls="v-pills-site" aria-selected="false">Site Statistics</a>
+        <a class="nav-link" id="v-pills-pp-tab" data-toggle="pill" href="#v-pills-pp" role="tab" aria-controls="v-pills-pp" aria-selected="false">Site Pocket Pairs</a>
+      </div>
+
+      <div class="wrap-table50" style="width: 70%;">
+        <div class="tab-content" id="v-pills-tabContent">
+          <div class="tab-pane fade show" id="v-pills-site" role="tabpanel" aria-labelledby="v-pills-site-tab">
+            <div class="table100 ver1 m-b-50">
+              <div class="table100-head">
+                <table>
+                  <thead>
+                    <tr class="row100 head">
+                      <th class="cell100 stats-column1">Site Statistic</th>
+                      <th class="cell100 stats-column2">Value</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+
+              <div class="table100-body js-pscroll">
+                <table>
+                  <tbody>
+                    _SITE_STATS_BODY_
+                    <!-- footer -->
+                    <tr class="row100 body">
+                      <td class="cell100 stats-column1"></td>
+                      <td class="cell100 stats-column2"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane fade show" id="v-pills-pp" role="tabpanel" aria-labelledby="v-pills-pp-tab">
+            <div class="table100 ver1 m-b-50">
+              <div class="table100-head">
+                <table>
+                  <thead>
+                    <tr class="row100 head">
+                      <th class="cell100 stats-medium-column">Pocket Pair</th>
+                      <th class="cell100 stats-medium-column">Frequency</th>
+                      <th class="cell100 stats-medium-column">Total Wins</th>
+                      <th class="cell100 stats-medium-column">Showdown Wins</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+
+              <div class="table100-body js-pscroll">
+                <table>
+                  <tbody>
+                    _SITE_POCKET_PAIRS_BODY_
+                    <!-- footer -->
+                    <tr class="row100 body">
+                      <td class="cell100 stats-medium-column"></td>
+                      <td class="cell100 stats-medium-column"></td>
+                      <td class="cell100 stats-medium-column"></td>
+                      <td class="cell100 stats-medium-column"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane fade show" id="v-pills-player-pp" role="tabpanel" aria-labelledby="v-pills-player-pp-tab">
+            <div class="table100 ver1 smallhead m-b-50">
+              <div class="table100-head">
+                <table>
+                  <thead>
+                    <tr class="row100 head">
+                      <th class="cell100 playerstats-column-header"">Player</th>
+                        <th class=" cell100 playerpocketpair-column-header">AA</th>
+                      <th class="cell100 playerpocketpair-column-header">KK</th>
+                      <th class="cell100 playerpocketpair-column-header">QQ</th>
+                      <th class="cell100 playerpocketpair-column-header">JJ</th>
+                      <th class="cell100 playerpocketpair-column-header">TT</th>
+                      <th class="cell100 playerpocketpair-column-header">99</th>
+                      <th class="cell100 playerpocketpair-column-header">88</th>
+                      <th class="cell100 playerpocketpair-column-header">77</th>
+                      <th class="cell100 playerpocketpair-column-header">66</th>
+                      <th class="cell100 playerpocketpair-column-header">55</th>
+                      <th class="cell100 playerpocketpair-column-header">44</th>
+                      <th class="cell100 playerpocketpair-column-header">33</th>
+                      <th class="cell100 playerpocketpair-column-header">22</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+
+              <div class="table100-body js-pscroll">
+                <table>
+                  <tbody>
+                    _PLAYER_POCKET_PAIRS_BODY_
+                    <!-- footer -->
+                    <tr class="row100 body">
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerpocketpair-column-header"></td>
+                      <td class="cell100 playerpocketpair-column-header"></td>
+                      <td class="cell100 playerpocketpair-column-header"></td>
+                      <td class="cell100 playerpocketpair-column-header"></td>
+                      <td class="cell100 playerpocketpair-column-header"></td>
+                      <td class="cell100 playerpocketpair-column-header"></td>
+                      <td class="cell100 playerpocketpair-column-header"></td>
+                      <td class="cell100 playerpocketpair-column-header"></td>
+                      <td class="cell100 playerpocketpair-column-header"></td>
+                      <td class="cell100 playerpocketpair-column-header"></td>
+                      <td class="cell100 playerpocketpair-column-header"></td>
+                      <td class="cell100 playerpocketpair-column-header"></td>
+                      <td class="cell100 playerpocketpair-column-header"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane fade show active" id="v-pills-player-tournament" role="tabpanel" aria-labelledby="v-pills-player-tournament-tab">
+            <div class="table100 ver1 smallhead m-b-50">
+              <div class="table100-head">
+                <table>
+                  <thead>
+                    <tr class="row100 head">
+                      <th class="cell100 playerstats-column-header">Player</th>
+                      <th class="cell100 playerstats-column-header">Hands Won</th>
+                      <th class="cell100 playerstats-column-header">Hands Played</th>
+                      <th class="cell100 playerstats-column-header">Hands Dealt</th>
+                      <th class="cell100 playerstats-column-header">All-Ins</th>
+                      <th class="cell100 playerstats-column-header">Entered</th>
+                      <th class="cell100 playerstats-column-header">Winnings</th>
+                      <th class="cell100 playerstats-column-header">Cashing Odds</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+
+              <div class="table100-body js-pscroll">
+                <table>
+                  <tbody>
+                    _PLAYER_TOURNAMENT_STATS_BODY_
+                    <!-- footer -->
+                    <tr class="row100 body">
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane fade show" id="v-pills-player-cash" role="tabpanel" aria-labelledby="v-pills-player-cash-tab">
+            <div class="table100 ver1 smallhead m-b-50">
+              <div class="table100-head">
+                <table>
+                  <thead>
+                    <tr class="row100 head">
+                      <th class="cell100 playerstats-column-header">Player</th>
+                      <th class="cell100 playerstats-column-header">Hands Won</th>
+                      <th class="cell100 playerstats-column-header">Hands Played</th>
+                      <th class="cell100 playerstats-column-header">Hands Dealt</th>
+                      <th class="cell100 playerstats-column-header">All-Ins</th>
+                      <th class="cell100 playerstats-column-header">Avg. Won Pot</th>
+                      <th class="cell100 playerstats-column-header">Biggest Pot</th>
+                      <th class="cell100 playerstats-column-header">Profit</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+              <div class="table100-body js-pscroll">
+                <table>
+                  <tbody>
+                    _PLAYER_CASH_STATS_BODY_
+                    <!-- footer -->
+                    <tr class="row100 body">
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                      <td class="cell100 playerstats-column-header"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+  <script src="vendor/bootstrap/js/popper.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="vendor/select2/select2.min.js"></script>
+  <script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+  <script>
+    $('.js-pscroll').each(function () {
+      var ps = new PerfectScrollbar(this);
+
+      $(window).on('resize', function () {
+        ps.update();
+      })
+    });
+  </script>
+  <script src="js/main.js?v=1.0.6"></script>
+
+</body>
+
+</html>
