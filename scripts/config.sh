@@ -14,6 +14,10 @@ case "$(uname -s)" in
    CYGWIN*|MINGW32*|MSYS*|MINGW*)
     # bash on windows has problems with spaces in the directory names
     POKER_MAVENS_HOME_DIR="/c/Users/Administrator/AppData/Roaming/pokerm~1/"
+
+    # add required GNU programs to the path
+    PATH="$PATH:/c/ (x86)/GnuWin32/bin"
+    PATH="$PATH:/c/Program Files/tidy 5.8.0/bin"
      ;;
 
    # Add here more strings to compare
