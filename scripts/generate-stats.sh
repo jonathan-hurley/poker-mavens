@@ -8,6 +8,8 @@ DATE=`date "+Generated on %B %d, %Y"`
 # copy the files we care about to temp directories for easier grep'ing later
 TOURNMANENT_TEMP_DIR=`mktemp -d`
 CASH_TEMP_DIR=`mktemp -d`
+echo "=========   PREPARING   ========="
+echo "Copying files from $PM_DATA_HAND_HISTORY_DIR to temp directories..."
 grep -l "Starting tournament" $PM_DATA_HAND_HISTORY_DIR/* | xargs -d "\n" cp -t $TOURNMANENT_TEMP_DIR
 grep -L "Starting tournament" $PM_DATA_HAND_HISTORY_DIR/* | xargs -d "\n" cp -t $CASH_TEMP_DIR
 

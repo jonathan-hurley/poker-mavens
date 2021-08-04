@@ -24,9 +24,9 @@ then
 fi
 
 # set required variables
-PM_DATA_TOURNEY_DIR=$POKER_MAVENS_HOME_DIR/TourneyResults
-PM_DATA_HAND_HISTORY_DIR=$POKER_MAVENS_HOME_DIR/HandHistory
-PM_DATA_LOGS_DIR=$POKER_MAVENS_HOME_DIR/Logs
+PM_DATA_TOURNEY_DIR="$POKER_MAVENS_HOME_DIR/TourneyResults"
+PM_DATA_HAND_HISTORY_DIR="$POKER_MAVENS_HOME_DIR/HandHistory"
+PM_DATA_LOGS_DIR="$POKER_MAVENS_HOME_DIR/Logs"
 
 # calculate how much money a player has spent on buy-ins
 function calculatePlayerBuyInTotal(){
