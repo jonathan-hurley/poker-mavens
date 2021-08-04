@@ -5,12 +5,12 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/players.sh"
 
 # exit on missing required variables
-REQUIRED_VARS=( POKER_MAVENS_HOME_DIR POKER_SITE_NAME )
-for REQ_VAR_NAME in "${REQUIRED_VARS[@]}"
+requiredVariables=( POKER_MAVENS_HOME_DIR POKER_SITE_NAME )
+for requiredVariableName in "${requiredVariables[@]}"
 do
-  REQ_VAR="${!REQ_VAR_NAME}"
-  if [[ -z $REQ_VAR ]]; then
-    echo "The config value for $REQ_VAR_NAME is not defined"
+  requiredVariable="${!requiredVariableName}"
+  if [[ -z $requiredVariable ]]; then
+    echo "The config value for $requiredVariableName is not defined"
     exit 1
   fi
 done
@@ -19,9 +19,21 @@ done
 pythonVersion=$(python -V 2>&1 | grep -Po '(?<=Python )(.+)')
 if [[ -z "$pythonVersion" ]]
 then
-    echo "Python v3.x must be installed in order for these scripts to work" 
+    echo "Python must be installed in order for these scripts to work"
     exit 1
 fi
+
+# ensure that command we use are available on the path
+requiredCommands=( grep egrep bc sed tidy )
+for requiredCommandName in "${requiredCommands[@]}"
+do
+  command -v $requiredCommandName &> /dev/null
+  retVal=$?
+  if [ $retVal -ne 0 ]; then
+    echo "The command $requiredCommandName is required and was not found on the path."
+    exit 1
+  fi
+done
 
 # set required variables
 PM_DATA_TOURNEY_DIR="$POKER_MAVENS_HOME_DIR/TourneyResults"
