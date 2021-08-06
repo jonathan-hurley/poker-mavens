@@ -3,6 +3,23 @@ This repository contains scripts and asset files for Poker Mavens v6.x. The foll
 - Site-wide statistics such as total number of hands, types of hands, winning hands, pocket pairs, etc
 - Player statistics such as the total winnings, profits, dealt hands, etc
 
+
+## Prerequisites
+### Logs
+Although a lot of this works off of the Tournament Results and Hand History logs, a lot of the cash game code requires the regular logs as well. You'll want to configure your Poker Mavens server to retain all logs and never get rid of them. Under the `System` tab, you'll want to make sure that the following settings are configured:
+- `Save Logs to File`: `Yes`
+- `Maximum Log Days`: `0`
+- `Maximum History Days`: `0`
+- `Maximum Tournament Days`: `0`
+
+### Required Software
+You can see the list of software in the next section entitled "Getting Started". Although there are many ways to run the scripts locally on a fast computer, much of this guide was written assuming that you will want to run this on an Amazon EC2 instance that is hosting your Poker Mavens site.
+
+### Hosting the Web Pages
+As this guide has been written assuming minimal knowledge and capabilities of the user, it's also designed to have Poker Mavens host the HTML files itself. 
+
+The scripts below will create static HTML pages that you can have Poker Mavens host. There's a configuration under `System` -> `Web Settings` -> `Web Folder`. This can point directly to the folder in this repository called `web`. 
+
 ## Getting Started
 Depending on which operating system you are using, you may need to download one or more of the following supporting files. 
 - `bash`
