@@ -1,8 +1,14 @@
 # Poker Mavens Assets & Supporting Files
-This repository contains scripts and asset files for Poker Mavens v6.x. The following is an abbreviate list of what kinds of statistics are calculate:
+This repository contains scripts and asset files for Poker Mavens v6.x. 
+
+The following is an abbreviated list of what kinds of statistics are calculated:
 - Site-wide statistics such as total number of hands, types of hands, winning hands, pocket pairs, etc
 - Player statistics such as the total winnings, profits, dealt hands, etc
 
+Asset files are also vailable in order to provide customization to your site. 
+- Custom cards (in normal and bold font)
+  - Standard, faces-only, 4-color, etc
+- Fun avatars
 
 ## Prerequisites
 ### Logs
@@ -51,6 +57,9 @@ Some users, especially those want to run this directly on their AWS EC2 instance
 3. You can choose to modify the following files to better customize your results:
      - `images/logo.png`: this is the logo that is generated at the top of all HTML files
      - `scripts/config.sh`: specifically, the `POKER_SITE_NAME` environment variable
+
+#### EC2
+Running these scripts on your AWS EC2 instance is possible. However, its computing power is limited and they will take much longer to run.
 
 ## Running the Scripts
 You should be able to the run the scripts using `Git Bash` and executing the `generate.sh` script.
