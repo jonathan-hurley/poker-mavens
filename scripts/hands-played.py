@@ -1,6 +1,16 @@
 import argparse
 import glob
 import re
+import platform
+
+# converts a cygwin/ming style path to windows for windows python
+def convert_path_to_windows(path):
+    match = re.match('(/(cygdrive/)?)(.*)', path)
+    if not match:
+        return path.replace('/', '\\')
+    dirs = match.group(3).split('/')
+    dirs[0] = f'{dirs[0].upper()}:'
+    return '\\'.join(dirs)
 
 # args
 #  - player
@@ -11,10 +21,15 @@ parser.add_argument('--player', dest='player', action='store', required='true', 
 parser.add_argument('--pattern', dest='pattern', action='store', required='true', help='the file glob pattern')
 args = parser.parse_args()
 
+filePattern = args.pattern
+if platform.system() == "Windows":
+	filePattern = convert_path_to_windows(filePattern)
+	print(filePattern)
+
 handsPlayed = 0
 regex = r"Hand #(.|\n)*?(?:{player} (?:calls|checks|raises|bets))(?:.|\n*^\s*$)".format(player=args.player)
-for filename in glob.iglob(args.pattern):
-	file = open(filename, 'r')
+for filename in glob.iglob(filePattern):
+	file = open(filename, mode='r', encoding="utf8")
 	handHistory = file.read()
 	file.close()
 

@@ -140,7 +140,7 @@ do
     PLAYER_ALL_INS_CASH_RATE=$(bc <<< "scale=4; x = $TOTAL_PLAYER_HANDS_DEALT_CASH / $PLAYER_ALL_INS_CASH; scale = 0; x / 1")
   fi
 
-  if [ "$PLAYER_HANDS_PLAYED_TOURNAMENT" -ne "0" ]; then
+  if [[ "$PLAYER_HANDS_PLAYED_TOURNAMENT" -ne "0" ]]; then
     HANDS_WON_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $PLAYER_WON_HANDS_TOURNAMENT / $PLAYER_HANDS_PLAYED_TOURNAMENT * 100; scale = 2; x / 1")
     HANDS_PLAYED_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $PLAYER_HANDS_PLAYED_TOURNAMENT / $TOTAL_PLAYER_HANDS_DEALT_TOURNAMENT * 100; scale = 2; x / 1")
 
@@ -157,7 +157,7 @@ do
 
   # calculate odds
   PLAYER_WINNING_ODDS_PCT=0
-  if [ "$PLAYER_NUMBER_OF_TOURNAMENTS" -ne "0" ]; then
+  if [[ "$PLAYER_NUMBER_OF_TOURNAMENTS" -ne "0" ]]; then
     PLAYER_WINNING_ODDS_PCT=$(bc <<< "scale=4; x = $PLAYER_TOURNAMENT_CASHES / $PLAYER_NUMBER_OF_TOURNAMENTS * 100; scale = 2; x / 1")
   fi
 
@@ -376,7 +376,7 @@ echo "$STATS_HTML_CONTENT" > web/stats.html
 # cleanup time
 echo ""
 echo "=========   FINALIZING   ========="
-echo "Cleaning up the follwing temporary directories:"
+echo "Cleaning up the following temporary directories:"
 if [ -d "$TOURNMANENT_TEMP_DIR" ]; then echo "  -> $TOURNMANENT_TEMP_DIR"; rm -R $TOURNMANENT_TEMP_DIR; fi
 if [ -d "$CASH_TEMP_DIR" ]; then echo "  -> $CASH_TEMP_DIR"; rm -R $CASH_TEMP_DIR; fi
 echo ""
