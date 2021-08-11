@@ -372,3 +372,11 @@ STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_POKER_SITE_NAME_/$POKER_SITE_NAME}"
 
 # print it to the file
 echo "$STATS_HTML_CONTENT" > web/stats.html
+
+# cleanup time
+echo ""
+echo "=========   FINALIZING   ========="
+echo "Cleaning up the follwing temporary directories:"
+if [ -d "$TOURNMANENT_TEMP_DIR" ]; then echo "  -> $TOURNMANENT_TEMP_DIR"; rm -R $TOURNMANENT_TEMP_DIR; fi
+if [ -d "$CASH_TEMP_DIR" ]; then echo "  -> $CASH_TEMP_DIR"; rm -R $CASH_TEMP_DIR; fi
+echo ""
