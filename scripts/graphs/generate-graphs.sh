@@ -1,7 +1,6 @@
 #!/bin/bash
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-. "$DIR/../players.sh"
 . "$DIR/../common.sh"
 . "$DIR/generate-plot-data.sh"
 

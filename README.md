@@ -61,6 +61,22 @@ Some users, especially those want to run this directly on their AWS EC2 instance
 #### EC2
 Running these scripts on your AWS EC2 instance is possible. However, its computing power is limited and they will take much longer to run.
 
+### Adding Players
+The scripts don't use the Poker Mavens APIs, so in order to determine the players to calculate statistics for, you need to add a new file to the `scripts` directory called `players.sh`. There's a provided template that you can use for this:
+```bash
+cp scripts/players-template.sh scripts/players.sh
+notepad scripts/players.sh
+```
+
+Adding players is easy; you just have to make changes to the first list:
+```bash
+# Lists all players to generate graph data for
+PLAYERS=( "Jonathan"
+"Andrew"
+"Mike-D"
+)
+```
+
 ## Running the Scripts
 You should be able to the run the scripts using `Git Bash` and executing the `generate.sh` script.
 ```
@@ -93,7 +109,7 @@ The shell scripts located in `scripts` are used to generate static HTML pages th
     - `web/stats.html`
     - `web/winnings-results.html`
 - `hands-played.py`: calculates how many hands a player was dealt, folded, played, etc
-- `players.sh`: a list of the players to run the program for as well as any offsets to calculate into their totals
+- `players-template.sh`: an example template of a list of the players to run the program for as well as any offsets to calculate into their totals. This is only a template; you can copy this to a brand new file called `players.sh` and edit that one.
 
 ### Templates (`./templates`)
 The HTML files located in `templates` are used as template files when rendering the static HTML pages.

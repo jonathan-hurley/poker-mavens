@@ -1,7 +1,7 @@
 #!/bin/bash
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-. "$DIR/players.sh"
+. "$DIR/common.sh"
 
 # Convert the Poker Mavens data into a CSV that can be consumed by gnuplot
 function generatePlotData(){
