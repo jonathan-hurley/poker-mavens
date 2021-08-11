@@ -76,7 +76,7 @@ for i in "${!PLAYERS[@]}"; do
   do
     ROW_TR="<tr class=\"row100 body\">_PLAYER_TD_</tr>"
     ROW_ALL_TDS="<td class=\"playerpocketpair-cell\">$FIRST_CARD</td>"
-    PLAYER_TOTAL_HANDS_DEALT=`egrep -e "Seat.*$PLAYER \(.*\) \[.*\]" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
+    PLAYER_TOTAL_HANDS_DEALT=`egrep -he "Seat.*$PLAYER \(.*\) \[.*\]" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
 
     if [[ $PLAYER_TOTAL_HANDS_DEALT -eq 0 ]]; then
       echo "[$NOW] Player $PLAYER has not played any hands yet!"
