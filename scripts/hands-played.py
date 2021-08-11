@@ -24,7 +24,6 @@ args = parser.parse_args()
 filePattern = args.pattern
 if platform.system() == "Windows":
 	filePattern = convert_path_to_windows(filePattern)
-	print(filePattern)
 
 handsPlayed = 0
 regex = r"Hand #(.|\n)*?(?:{player} (?:calls|checks|raises|bets))(?:.|\n*^\s*$)".format(player=args.player)
