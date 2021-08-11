@@ -25,3 +25,7 @@ case "$(uname -s)" in
    *)
      ;;
 esac
+
+# locale for printing numbers (1000 vs 1,000)
+LANG=${LANG:="en_US.UTF-8"}
+export LANG
