@@ -156,7 +156,12 @@ do
   PLAYER_CASH_TOTAL=$(calculatePlayerCashTotal "$PLAYER")
 
   # calculate odds
-  PLAYER_WINNING_ODDS_PCT=$(bc <<< "scale=4; x = $PLAYER_TOURNAMENT_CASHES / $PLAYER_NUMBER_OF_TOURNAMENTS * 100; scale = 2; x / 1")
+  PLAYER_WINNING_ODDS_PCT=0
+  if [ "$PLAYER_NUMBER_OF_TOURNAMENTS" -ne "0" ]; then
+    PLAYER_WINNING_ODDS_PCT=$(bc <<< "scale=4; x = $PLAYER_TOURNAMENT_CASHES / $PLAYER_NUMBER_OF_TOURNAMENTS * 100; scale = 2; x / 1")
+  fi
+
+  # format the odds
   PLAYER_WINNING_ODDS_PCT=$(printf "%.2f" $PLAYER_WINNING_ODDS_PCT)
 
   # format the big numbers
@@ -209,7 +214,11 @@ do
   for HAND in "${HANDS[@]}"
   do
     NUM_PLAYER_POCKET_PAIRS=`egrep -oh "$PLAYER \(.*\) \[$HAND\w $HAND\w\]" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
-    PLAYER_POCKET_PAIR_PCT=$(bc <<< "scale=4; x = $NUM_PLAYER_POCKET_PAIRS / $TOTAL_PLAYER_HANDS_DEALT * 100; scale = 2; x / 1")
+    PLAYER_POCKET_PAIR_PCT=0
+    if [[ "TOTAL_PLAYER_HANDS_DEALT" -ne 0 ]]; then
+      PLAYER_POCKET_PAIR_PCT=$(bc <<< "scale=4; x = $NUM_PLAYER_POCKET_PAIRS / $TOTAL_PLAYER_HANDS_DEALT * 100; scale = 2; x / 1")
+    fi
+
     PLAYER_POCKET_PAIR_PCT=$(printf "%.2f" $PLAYER_POCKET_PAIR_PCT)
 
     # format the big numbers
