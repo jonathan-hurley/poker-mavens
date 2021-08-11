@@ -2,7 +2,14 @@
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/config.sh"
-. "$DIR/players.sh"
+
+if [ -f "$DIR/players.sh" ]; then
+    . "$DIR/players.sh"
+else
+    . "$DIR/players-template.sh"
+fi
+
+
 
 # exit on missing required variables
 requiredVariables=( POKER_MAVENS_HOME_DIR POKER_SITE_NAME )

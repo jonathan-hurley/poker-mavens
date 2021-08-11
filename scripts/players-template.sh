@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-# Lists all players to generate graph data for
+# Lists all players to generate data for
 PLAYERS=( "Player-1"
 "Player-2"
-"Andrew"
 )
 
 # Missing cash data
