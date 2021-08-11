@@ -2,15 +2,12 @@ import argparse
 import glob
 import re
 import platform
+from subprocess import check_output
 
 # converts a cygwin/ming style path to windows for windows python
 def convert_path_to_windows(path):
-    match = re.match('(/(cygdrive/)?)(.*)', path)
-    if not match:
-        return path.replace('/', '\\')
-    dirs = match.group(3).split('/')
-    dirs[0] = f'{dirs[0].upper()}:'
-    return '\\'.join(dirs)
+	output = check_output(["cygpath", "-w", path[:-1]], encoding='UTF-8')
+	return output.strip() + "*"
 
 # args
 #  - player

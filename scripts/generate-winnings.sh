@@ -13,7 +13,7 @@ do
   # calculate player cash total
   PLAYER_CASH_TOTAL=$(calculatePlayerCashTotal "$PLAYER")
 
-  if [[ "$PLAYER_CASH_TOTAL" == 0 ]]; then
+  if [[ $PLAYER_CASH_TOTAL == 0 ]]; then
     echo "$PLAYER: \$0.00"
     continue
   fi
