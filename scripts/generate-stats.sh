@@ -334,9 +334,9 @@ do
   POCKET_PAIR_PCT=$(printf "%.2f" $POCKET_PAIR_PCT)
   POCKET_PAIR_ONE_IN=$(bc <<< "scale=4; x = $TOTAL_PLAYER_HANDS/$POCKET_PAIR; scale = 0; x / 1")
 
-  POCKET_PAIR_HANDS_WON=`egrep "^.* \(\+.*\) (\[$HAND\w $HAND\w\])" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
-  POCKET_PAIR_HANDS_WON_SHOWDOWN=`egrep "^.* \(\+.*\) (\[$HAND\w $HAND\w\]) Showdown" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
-  POCKET_PAIR_HANDS_LOST=`egrep "^.* \(\-.*\) (\[$HAND\w $HAND\w\])" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
+  POCKET_PAIR_HANDS_WON=`egrep -h "^.* \(\+.*\) (\[$HAND\w $HAND\w\])" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
+  POCKET_PAIR_HANDS_WON_SHOWDOWN=`egrep -h "^.* \(\+.*\) (\[$HAND\w $HAND\w\]) Showdown" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
+  POCKET_PAIR_HANDS_LOST=`egrep -h "^.* \(\-.*\) (\[$HAND\w $HAND\w\])" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
   POCKET_PAIR_HANDS_TOTAL=$(($POCKET_PAIR_HANDS_WON+$POCKET_PAIR_HANDS_LOST))
   POCKET_PAIR_HANDS_WON_PCT=$(bc <<< "scale=4; x = $POCKET_PAIR_HANDS_WON/$POCKET_PAIR_HANDS_TOTAL * 100; scale = 2; x / 1")
   POCKET_PAIR_HANDS_WON_SHOWDOWN_PCT=$(bc <<< "scale=4; x = $POCKET_PAIR_HANDS_WON_SHOWDOWN/$POCKET_PAIR_HANDS_TOTAL * 100; scale = 2; x / 1")
