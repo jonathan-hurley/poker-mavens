@@ -129,10 +129,10 @@ do
   PLAYER_ALL_INS_CASH_RATE=0
   PLAYER_ALL_INS_TOURNAMENT_PCT=0
   PLAYER_ALL_INS_TOURNAMENT_RATE=0
-  if [[ "PLAYER_HANDS_PLAYED_CASH" -ne 0 ]]; then
+  if [[ $PLAYER_HANDS_PLAYED_CASH != 0 ]]; then
     HANDS_WON_CASH_PCT=$(bc <<< "scale=4; x = $PLAYER_WON_HANDS_CASH / $PLAYER_HANDS_PLAYED_CASH * 100; scale = 2; x / 1")
     HANDS_PLAYED_CASH_PCT=$(bc <<< "scale=4; x = $PLAYER_HANDS_PLAYED_CASH / $TOTAL_PLAYER_HANDS_DEALT_CASH * 100; scale = 2; x / 1")
-    if [[ "PLAYER_WON_HANDS_CASH" -ne 0 ]]; then
+    if [[ $PLAYER_WON_HANDS_CASH != 0 ]]; then
       PLAYER_AVG_WON_POT_SIZE_CASH=$(bc <<< "scale=4; x = $PLAYER_TOTAL_WON_POT_SIZE_CASH / $PLAYER_WON_HANDS_CASH; scale = 2; x / 1")
     fi
 
@@ -140,7 +140,7 @@ do
     PLAYER_ALL_INS_CASH_RATE=$(bc <<< "scale=4; x = $TOTAL_PLAYER_HANDS_DEALT_CASH / $PLAYER_ALL_INS_CASH; scale = 0; x / 1")
   fi
 
-  if [[ "$PLAYER_HANDS_PLAYED_TOURNAMENT" -ne "0" ]]; then
+  if [[ $PLAYER_HANDS_PLAYED_TOURNAMENT != 0 ]]; then
     HANDS_WON_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $PLAYER_WON_HANDS_TOURNAMENT / $PLAYER_HANDS_PLAYED_TOURNAMENT * 100; scale = 2; x / 1")
     HANDS_PLAYED_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $PLAYER_HANDS_PLAYED_TOURNAMENT / $TOTAL_PLAYER_HANDS_DEALT_TOURNAMENT * 100; scale = 2; x / 1")
 
@@ -148,7 +148,7 @@ do
     PLAYER_ALL_INS_TOURNAMENT_RATE=$(bc <<< "scale=4; x = $PLAYER_ALL_INS_TOURNAMENT / $PLAYER_NUMBER_OF_TOURNAMENTS; scale = 0; x / 1")
   fi
 
-  if [[ "TOTAL_PLAYER_HANDS_DEALT_TOURNAMENT" -eq 0 ]] && [[ "TOTAL_PLAYER_HANDS_DEALT_CASH" -eq 0 ]]; then
+  if [[ $TOTAL_PLAYER_HANDS_DEALT_TOURNAMENT == 0 ]] && [[ $TOTAL_PLAYER_HANDS_DEALT_CASH == 0 ]]; then
     continue
   fi
 
@@ -157,7 +157,7 @@ do
 
   # calculate odds
   PLAYER_WINNING_ODDS_PCT=0
-  if [[ "$PLAYER_NUMBER_OF_TOURNAMENTS" -ne "0" ]]; then
+  if [[ $PLAYER_NUMBER_OF_TOURNAMENTS != 0 ]]; then
     PLAYER_WINNING_ODDS_PCT=$(bc <<< "scale=4; x = $PLAYER_TOURNAMENT_CASHES / $PLAYER_NUMBER_OF_TOURNAMENTS * 100; scale = 2; x / 1")
   fi
 
@@ -204,7 +204,7 @@ do
   # buld up the body
   TABLE_BODY_TOURNAMENT="$TABLE_BODY_TOURNAMENT $ROW_TEMPLATE_TOURNAMENT"
 
-  if [[ "TOTAL_PLAYER_HANDS_DEALT_CASH" -ne 0 ]]; then
+  if [[ $TOTAL_PLAYER_HANDS_DEALT_CASH != 0 ]]; then
     TABLE_BODY_CASH="$TABLE_BODY_CASH $ROW_TEMPLATE_CASH"
   fi
 
@@ -215,7 +215,7 @@ do
   do
     NUM_PLAYER_POCKET_PAIRS=`egrep -oh "$PLAYER \(.*\) \[$HAND\w $HAND\w\]" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
     PLAYER_POCKET_PAIR_PCT=0
-    if [[ "TOTAL_PLAYER_HANDS_DEALT" -ne 0 ]]; then
+    if [[ $TOTAL_PLAYER_HANDS_DEALT != 0 ]]; then
       PLAYER_POCKET_PAIR_PCT=$(bc <<< "scale=4; x = $NUM_PLAYER_POCKET_PAIRS / $TOTAL_PLAYER_HANDS_DEALT * 100; scale = 2; x / 1")
     fi
 
