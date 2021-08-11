@@ -3,13 +3,12 @@ DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/config.sh"
 
+# load a custom players file if it exists, otherwise just load the tempalte
 if [ -f "$DIR/players.sh" ]; then
     . "$DIR/players.sh"
 else
     . "$DIR/players-template.sh"
 fi
-
-
 
 # exit on missing required variables
 requiredVariables=( POKER_MAVENS_HOME_DIR POKER_SITE_NAME )
@@ -61,8 +60,8 @@ function calculatePlayerBuyInTotal(){
   fi
   
   while read -r TOURNAMENT_FILE; do
-    BUY_IN=`egrep "BuyIn" "$TOURNAMENT_FILE" | egrep -oe "[0-9|.]+\+[0-9]+" | bc`
-    REBUYS=`egrep "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | egrep -oe "Rebuys:[0-9]+" | tr -d 'Rebuys:'`
+    BUY_IN=`egrep -h "BuyIn" "$TOURNAMENT_FILE" | egrep -oe "[0-9|.]+\+[0-9]+" | bc`
+    REBUYS=`egrep -h "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | egrep -oe "Rebuys:[0-9]+" | tr -d 'Rebuys:'`
     if [[ -z $REBUYS ]]; then
       REBUYS=0
     fi
@@ -80,7 +79,7 @@ function calculatePlayerCashTotal(){
   # uses the House|Ring keyword to find money given to the house/ring for a player. 
   # The problem is that it's not for a player, it's for the house, so we need to mutiply by -1 to get the player's amount
   # We used to use the search by game name (ie Sizzler) but can't do that anymore since we want other games to show up
-  PLAYER_CASH_TOTAL=`egrep "House\|Ring.*($PLAYER .*)" $PM_DATA_LOGS_DIR/* | egrep -oe "House\|Ring.*balance" | egrep -oe "[-|+][0-9]+(\.[0-9]+)?" | awk '{s+=$1*-1} END {print s}'`
+  PLAYER_CASH_TOTAL=`egrep -h "House\|Ring.*($PLAYER .*)" $PM_DATA_LOGS_DIR/* | egrep -oe "House\|Ring.*balance" | egrep -oe "[-|+][0-9]+(\.[0-9]+)?" | awk '{s+=$1*-1} END {print s}'`
   if [[ -z $PLAYER_CASH_TOTAL ]]; then
     PLAYER_CASH_TOTAL=0
   fi
@@ -97,7 +96,7 @@ function calculatePlayerCashTotal(){
 # also handles bourntys of the form ($0+$0)
 function calculatePlayerTournamentWinnings(){
   PLAYER=$1
-  TOURNAMENT_WINNINGS=$(egrep "Place[0-9]+=$PLAYER " $PM_DATA_TOURNEY_DIR/* | egrep -oe "\(.*\)" | tr -d '()' | bc | awk '{s+=$1}END{print s}')
+  TOURNAMENT_WINNINGS=$(egrep -h "Place[0-9]+=$PLAYER " $PM_DATA_TOURNEY_DIR/* | egrep -oe "\(.*\)" | tr -d '()' | bc | awk '{s+=$1}END{print s}')
 
   if [[ -z $TOURNAMENT_WINNINGS ]]; then
     TOURNAMENT_WINNINGS=0
@@ -115,7 +114,7 @@ function calculatePlayerTournamentWinnings(){
 # also handles bourntys of the form ($0+$0)
 function calculatePlayerNumberOfCashes(){
   PLAYER=$1
-  NUMBER_OF_CASHES=$(egrep "Place[0-9]+=$PLAYER " $PM_DATA_TOURNEY_DIR/* | egrep -oe "\(.*\)" | egrep -v "\(0\)|\(0\+0\)" | tr -d '()' | wc -l)
+  NUMBER_OF_CASHES=$(egrep -h "Place[0-9]+=$PLAYER " $PM_DATA_TOURNEY_DIR/* | egrep -oe "\(.*\)" | egrep -v "\(0\)|\(0\+0\)" | tr -d '()' | wc -l)
 
   if [ ${PLAYER_NUM_CASHES_OFFSET[$PLAYER]+_} ]; then
     OFFSET=${PLAYER_NUM_CASHES_OFFSET[$PLAYER]}
