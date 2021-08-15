@@ -25,10 +25,11 @@ GREP_FILE_PATTERN_TOURNAMENT_RESULTS="$PM_DATA_TOURNEY_DIR/*"
 
 HANDS=( "A" "K" "Q" "J" "T" "9" "8" "7" "6" "5" "4" "3" "2" )
 
-echo "=========   SITE STATISTICS   ========="
-echo "Processing site-wide stats ..."
 TOTAL_PLAYER_HANDS=`egrep -he 'Seat.*\[\w\w \w\w\]' $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
 TABLE_HANDS=`egrep -he 'Hand #' $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
+TABLE_HANDS_CASH=`egrep -he 'Hand #' $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
+TABLE_HANDS_TOURNAMENT=`egrep -he 'Hand #' $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
+
 FLOPS_SEEN=`egrep -he '\*\* Flop \*\*' $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
 FLOPS_SEEN_PCT=$(bc <<< "scale=4; x = $FLOPS_SEEN / $TABLE_HANDS * 100; scale = 2; x / 1")
 FLOPS_WITH_SAME_SUIT=`egrep -he '\*\* Flop \*\* (?:\[\ws \ws \ws\]|\[\wh \wh \wh\]|\[\wc \wc \wc\]|\[\wd \wd \wd\])' $GREP_FILE_PATTERN_ALL | wc -l`
@@ -62,10 +63,34 @@ PAIR_PCT=$(bc <<< "scale=4; x = $PAIR / $TOTAL_PLAYER_HANDS * 100; scale = 2; x 
 HIGH_CARD=`egrep -he '.*shows.*High Card' $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
 HIGH_CARD_PCT=$(bc <<< "scale=4; x = $HIGH_CARD / $TOTAL_PLAYER_HANDS * 100; scale = 2; x / 1")
 
-printf "Flops Seen: %'d (%.2f%%)  Dealt: %'d  Suited Flops: %'d (%.2f%%) AA: %'d (%.2f%%)\n" \
+# showdown stats
+HAND_ENDS_PREFLOP_TOURNAMENT=`egrep -he 'End: PreFlop' $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
+HAND_ENDS_PREFLOP_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_PREFLOP_TOURNAMENT / $TABLE_HANDS_TOURNAMENT * 100; scale = 2; x / 1")
+HAND_ENDS_FLOP_TOURNAMENT=`egrep -he 'End: Flop' $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
+HAND_ENDS_FLOP_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_FLOP_TOURNAMENT / $TABLE_HANDS_TOURNAMENT * 100; scale = 2; x / 1")
+HAND_ENDS_TURN_TOURNAMENT=`egrep -he 'End: Turn' $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
+HAND_ENDS_TURN_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_TURN_TOURNAMENT / $TABLE_HANDS_TOURNAMENT * 100; scale = 2; x / 1")
+HAND_ENDS_RIVER_TOURNAMENT=`egrep -he 'End: River' $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
+HAND_ENDS_RIVER_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_RIVER_TOURNAMENT / $TABLE_HANDS_TOURNAMENT * 100; scale = 2; x / 1")
+HAND_ENDS_SHOWDOWN_TOURNAMENT=`egrep -he 'End: Showdown' $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
+HAND_ENDS_SHOWDOWN_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_SHOWDOWN_TOURNAMENT / $TABLE_HANDS_TOURNAMENT * 100; scale = 2; x / 1")
+HAND_ENDS_PREFLOP_CASH=`egrep -he 'End: PreFlop' $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
+HAND_ENDS_PREFLOP_CASH_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_PREFLOP_CASH / $TABLE_HANDS_CASH * 100; scale = 2; x / 1")
+HAND_ENDS_FLOP_CASH=`egrep -he 'End: Flop' $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
+HAND_ENDS_FLOP_CASH_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_FLOP_CASH / $TABLE_HANDS_CASH * 100; scale = 2; x / 1")
+HAND_ENDS_TURN_CASH=`egrep -he 'End: Turn' $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
+HAND_ENDS_TURN_CASH_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_TURN_CASH / $TABLE_HANDS_CASH * 100; scale = 2; x / 1")
+HAND_ENDS_RIVER_CASH=`egrep -he 'End: River' $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
+HAND_ENDS_RIVER_CASH_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_RIVER_CASH / $TABLE_HANDS_CASH * 100; scale = 2; x / 1")
+HAND_ENDS_SHOWDOWN_CASH=`egrep -he 'End: Showdown' $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
+HAND_ENDS_SHOWDOWN_CASH_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_SHOWDOWN_CASH / $TABLE_HANDS_CASH * 100; scale = 2; x / 1")
+
+echo "========= SITE STATISTICS ========="
+printf " Flops Seen: %'d (%.2f%%) \n Table Hands: %'d \n Suited Flops: %'d (%.2f%%) \n AA: %'d (%.2f%%)\n" \
   $FLOPS_SEEN $FLOPS_SEEN_PCT $TABLE_HANDS $FLOPS_WITH_SAME_SUIT $FLOPS_WITH_SAME_SUIT_PCT $POCKET_AA $POCKET_AA_PCT
 
-printf "Royal Flushes: %'d (%.4f%%) Straight Flushes: %'d (%.4f%%) Quads: %'d (%.2f%%) FH: %'d (%.2f%%) Flush: %'d (%.2f%%) Straight: %'d (%.2f%%) 3-Kind: %'d (%.2f%%)\n" \
+echo ""
+printf " Royal Flushes: %'d (%.4f%%) \n Straight Flushes: %'d (%.4f%%) \n Quads: %'d (%.2f%%) \n FH: %'d (%.2f%%) \n Flush: %'d (%.2f%%) \n Straight: %'d (%.2f%%) \n 3-Kind: %'d (%.2f%%)\n" \
   $ROYAL_FLUSHES $ROYAL_FLUSH_PCT $STRAIGHT_FLUSH $STRAIGHT_FLUSH_PCT $QUADS $QUADS_PCT $FULL_HOUSE $FULL_HOUSE_PCT $FLUSH $FLUSH_PCT $STRAIGHT $STRAIGHT_PCT $THREE_KIND $THREE_KIND_PCT
 
 # format the big numbers
@@ -281,6 +306,29 @@ SITE_STATS_TEMPLATE="
                         <td class=\"cell100 stats-column2\">$AK_HANDS_WON ($AK_HANDS_WON_PCT%)</td>
                       </tr>
                       <tr class=\"row100 body\">
+                        <td class=\"cell100 stats-column1\">Cash Hand Summary</td>
+                        <td class=\"cell100 stats-column2\">
+                          Pre-Flop: $HAND_ENDS_PREFLOP_CASH_PCT%<br>
+                          Flop: $HAND_ENDS_FLOP_CASH_PCT%<br>
+                          Turn: $HAND_ENDS_TURN_CASH_PCT%<br>
+                          River: $HAND_ENDS_RIVER_CASH_PCT%<br>
+                          Showdown: $HAND_ENDS_SHOWDOWN_CASH_PCT%<br>
+                        </td>
+                      </tr>
+                      <tr class=\"row100 body\">
+                        <td class=\"cell100 stats-column1\">Tournament Hand Summary</td>
+                        <td class=\"cell100 stats-column2\">
+                          Pre-Flop: $HAND_ENDS_PREFLOP_TOURNAMENT_PCT%<br>
+                          Flop: $HAND_ENDS_FLOP_TOURNAMENT_PCT%<br>
+                          Turn: $HAND_ENDS_TURN_TOURNAMENT_PCT%<br>
+                          River: $HAND_ENDS_RIVER_TOURNAMENT_PCT%<br>
+                          Showdown: $HAND_ENDS_SHOWDOWN_TOURNAMENT_PCT%<br>
+                        </td>
+                      </tr>
+"
+
+TABLE_HAND_STATS_TEMPLATE="
+                      <tr class=\"row100 body\">
                         <td class=\"cell100 stats-column1\">Royal Flushes</td>
                         <td class=\"cell100 stats-column2\">$ROYAL_FLUSHES ($ROYAL_FLUSH_PCT%)</td>
                       </tr>
@@ -359,6 +407,10 @@ STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_SITE_STATS_BODY_/$SITE_STATS_TEMPLATE
 # add player pocket pairs status
 PLAYER_POCKET_PAIRS_BODY=`tidy --show-body-only yes -indent --indent-spaces 2 -quiet --tidy-mark no -w 200 --vertical-space no <<< $PLAYER_POCKET_PAIRS_BODY`
 STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_PLAYER_POCKET_PAIRS_BODY_/$PLAYER_POCKET_PAIRS_BODY}"
+
+# add table hand stats
+TABLE_HAND_STATS_BODY=`tidy --show-body-only yes -indent --indent-spaces 2 -quiet --tidy-mark no -w 200 --vertical-space no <<< $TABLE_HAND_STATS_TEMPLATE`
+STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_TABLE_HAND_STATS_BODY_/$TABLE_HAND_STATS_BODY}"
 
 # add site pocket pairs
 SITE_POCKET_PAIRS_BODY=`tidy --show-body-only yes -indent --indent-spaces 2 -quiet --tidy-mark no -w 200 --vertical-space no <<< $SITE_POCKET_PAIRS_BODY`
