@@ -123,3 +123,45 @@ function calculatePlayerNumberOfCashes(){
 
   echo $NUMBER_OF_CASHES
 }
+
+# calculates the average position that a player finishes the tournament
+# for tournaments with re-entry, we have to use tail -1 in order to only take the last entry
+function calculatePlayerAverageTournmanentFinish(){
+  PLAYER=$1
+
+  TOTAL_FINISHES=0
+  SUM_FINISH_POSITION=0
+  TOURNAMENT_FILES=$(egrep -l "Place[0-9]+=$PLAYER " $PM_DATA_TOURNEY_DIR/*)  
+  while read -r TOURNAMENT_FILE; do
+    # find the player's finish position
+    FINISH_POSITION=`egrep -oh "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | tail -1 | egrep -oh "Place[0-9]+=" | egrep -o "[0-9]+" | sed -e 's/^[[:space:]]*//'`
+    if [[ -z $FINISH_POSITION ]]; then      
+      continue
+    fi
+
+    TOTAL_FINISHES=$(( $TOTAL_FINISHES + 1 ))
+
+    # see if there were mulitple finishes
+    # first find the place (Place1=)
+    FINISH_POSITION_SUBSTRING=`egrep -oh "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | tail -1 | egrep -oh "Place[0-9]+="`
+
+    # now find the number of finishes in that position (1 or 2 or 3)
+    FINISH_POSITIONS_SPLIT_COUNT=`egrep -oh "$FINISH_POSITION_SUBSTRING" "$TOURNAMENT_FILE" | wc -l | sed -e 's/^[[:space:]]*//'`    
+    if [[ $FINISH_POSITIONS_SPLIT_COUNT -gt 1 ]]; then
+      splitSum=0
+      counter=1      
+      while [ $counter -le  $FINISH_POSITIONS_SPLIT_COUNT ]
+      do
+        splitSum=$(( $counter + $splitSum ))
+        counter=$(( $counter + 1 ))
+      done
+
+      FINISH_POSITION=$(bc -l <<< "scale=3; $splitSum / $FINISH_POSITIONS_SPLIT_COUNT")
+    fi
+
+    SUM_FINISH_POSITION=$(bc <<< "$SUM_FINISH_POSITION + $FINISH_POSITION")
+  done <<< "$TOURNAMENT_FILES"
+
+  AVERAGE_FINISH_POSITION=$(bc <<< "scale=2; $SUM_FINISH_POSITION / $TOTAL_FINISHES")
+  echo $AVERAGE_FINISH_POSITION
+}

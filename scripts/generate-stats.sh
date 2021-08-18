@@ -86,8 +86,8 @@ HAND_ENDS_SHOWDOWN_CASH=`egrep -he 'End: Showdown' $GREP_FILE_PATTERN_CASH | wc 
 HAND_ENDS_SHOWDOWN_CASH_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_SHOWDOWN_CASH / $TABLE_HANDS_CASH * 100; scale = 2; x / 1")
 
 echo "========= SITE STATISTICS ========="
-printf " Flops Seen: %'d (%.2f%%) \n Table Hands: %'d \n Suited Flops: %'d (%.2f%%) \n AA: %'d (%.2f%%)\n" \
-  $FLOPS_SEEN $FLOPS_SEEN_PCT $TABLE_HANDS $FLOPS_WITH_SAME_SUIT $FLOPS_WITH_SAME_SUIT_PCT $POCKET_AA $POCKET_AA_PCT
+printf " Player Hands Dealt: %'d \n Table Hands: %'d \n Flops Seen: %'d (%.2f%%) \n Suited Flops: %'d (%.2f%%) \n AA: %'d (%.2f%%)\n" \
+  $TOTAL_PLAYER_HANDS $TABLE_HANDS $FLOPS_SEEN $FLOPS_SEEN_PCT $FLOPS_WITH_SAME_SUIT $FLOPS_WITH_SAME_SUIT_PCT $POCKET_AA $POCKET_AA_PCT
 
 echo ""
 printf " Royal Flushes: %'d (%.4f%%) \n Straight Flushes: %'d (%.4f%%) \n Quads: %'d (%.2f%%) \n FH: %'d (%.2f%%) \n Flush: %'d (%.2f%%) \n Straight: %'d (%.2f%%) \n 3-Kind: %'d (%.2f%%)\n" \
@@ -180,10 +180,14 @@ do
   # calculate player cash total
   PLAYER_CASH_TOTAL=$(calculatePlayerCashTotal "$PLAYER")
 
-  # calculate odds
+  # calculate odds and finish position
   PLAYER_WINNING_ODDS_PCT=0
+  PLAYER_AVG_FINISH_POSITION=0
+  PLAYER_AVG_FINISH_TH="0th"
   if [[ $PLAYER_NUMBER_OF_TOURNAMENTS != 0 ]]; then
     PLAYER_WINNING_ODDS_PCT=$(bc <<< "scale=4; x = $PLAYER_TOURNAMENT_CASHES / $PLAYER_NUMBER_OF_TOURNAMENTS * 100; scale = 2; x / 1")
+    PLAYER_AVG_FINISH_POSITION=$(calculatePlayerAverageTournmanentFinish "$PLAYER")
+    PLAYER_AVG_FINISH_TH=`printf '%.0fth' "$PLAYER_AVG_FINISH_POSITION"`
   fi
 
   # format the odds
@@ -194,7 +198,7 @@ do
   PLAYER_HANDS_PLAYED_TOURNAMENT=$(printf "%'d" $PLAYER_HANDS_PLAYED_TOURNAMENT)
   PLAYER_WON_HANDS_TOURNAMENT=$(printf "%'d" $PLAYER_WON_HANDS_TOURNAMENT)
   PLAYER_WON_HANDS_CASH=$(printf "%'d" $PLAYER_WON_HANDS_CASH)
-  PLAYER_ALL_INS_TOURNAMENT=$(printf "%'d (%.2f%%)<br>%'d / Tournament" $PLAYER_ALL_INS_TOURNAMENT $PLAYER_ALL_INS_TOURNAMENT_PCT $PLAYER_ALL_INS_TOURNAMENT_RATE)
+  PLAYER_ALL_INS_TOURNAMENT=$(printf "%'d (%.2f%%)<br>%'d / Tourn." $PLAYER_ALL_INS_TOURNAMENT $PLAYER_ALL_INS_TOURNAMENT_PCT $PLAYER_ALL_INS_TOURNAMENT_RATE)
   PLAYER_ALL_INS_CASH=$(printf "%'d (%.2f%%)<br>1-in-%'d" $PLAYER_ALL_INS_CASH $PLAYER_ALL_INS_CASH_PCT $PLAYER_ALL_INS_CASH_RATE)
   TOTAL_PLAYER_HANDS_DEALT_CASH_FORMATTED=$(printf "%'d" $TOTAL_PLAYER_HANDS_DEALT_CASH)
   TOTAL_PLAYER_HANDS_DEALT_TOURNAMENT=$(printf "%'d" $TOTAL_PLAYER_HANDS_DEALT_TOURNAMENT)
@@ -210,6 +214,7 @@ do
                         <td class=\"playerstats-cell\">$PLAYER_NUMBER_OF_TOURNAMENTS</td>
                         <td class=\"playerstats-cell\"><span class=\"currency\">$PLAYER_TOURNAMENT_WINNINGS</span></td>
                         <td class=\"playerstats-cell\">$PLAYER_WINNING_ODDS_PCT%</td>
+                        <td class=\"playerstats-cell\">$PLAYER_AVG_FINISH_TH<br/>($PLAYER_AVG_FINISH_POSITION)</td>
                       </tr>
 "
 
