@@ -314,7 +314,7 @@ STATS_HTML_CONTENT=$(awk -v r="$TABLE_BODY_TOURNAMENT" '{gsub(/_PLAYER_TOURNAMEN
 STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_PLAYER_CASH_STATS_BODY_/$TABLE_BODY_CASH}"
 
 # create site-wide stats
-# format the big numbers
+# format the big site-wide numbers
 TOTAL_PLAYER_HANDS_FORMATTED=$(printf "%'d" $TOTAL_PLAYER_HANDS)
 TOTAL_PLAYER_HANDS_HOLDEM_FORMATTED=$(printf "%'d" $TOTAL_PLAYER_HANDS_HOLDEM)
 TOTAL_PLAYER_HANDS_OMAHA_FORMATTED=$(printf "%'d" $TOTAL_PLAYER_HANDS_OMAHA)
@@ -323,14 +323,7 @@ FLOPS_SEEN=$(printf "%'d" $FLOPS_SEEN)
 FLOPS_WITH_SAME_SUIT=$(printf "%'d" $FLOPS_WITH_SAME_SUIT)
 POCKET_AA=$(printf "%'d" $POCKET_AA)
 
-# format the little numbers
-ROYAL_FLUSH_PCT=$(printf "%.4f" $ROYAL_FLUSH_PCT)
-STRAIGHT_FLUSH_PCT=$(printf "%.4f" $STRAIGHT_FLUSH_PCT)
-QUADS_PCT=$(printf "%.4f" $QUADS_PCT)
-FULL_HOUSE_PCT=$(printf "%.3f" $FULL_HOUSE_PCT)
-FLUSH_PCT=$(printf "%.3f" $FLUSH_PCT)
-STRAIGHT_PCT=$(printf "%.3f" $STRAIGHT_PCT)
-THREE_KIND_PCT=$(printf "%.3f" $THREE_KIND_PCT)
+# format the little site-wide numbers
 POCKET_AA_PCT=$(printf "%.2f" $POCKET_AA_PCT)
 
 SITE_STATS_TEMPLATE="
@@ -386,6 +379,15 @@ SITE_STATS_TEMPLATE="
                       </tr>
 "
 
+# format the little holdem numbers
+ROYAL_FLUSH_PCT=$(printf "%.4f" $ROYAL_FLUSH_PCT)
+STRAIGHT_FLUSH_PCT=$(printf "%.4f" $STRAIGHT_FLUSH_PCT)
+QUADS_PCT=$(printf "%.4f" $QUADS_PCT)
+FULL_HOUSE_PCT=$(printf "%.3f" $FULL_HOUSE_PCT)
+FLUSH_PCT=$(printf "%.3f" $FLUSH_PCT)
+STRAIGHT_PCT=$(printf "%.3f" $STRAIGHT_PCT)
+THREE_KIND_PCT=$(printf "%.3f" $THREE_KIND_PCT)
+
 # holdem ranking template
 TABLE_HAND_STATS_TEMPLATE="
                       <tr class=\"row100 body\">
@@ -430,7 +432,7 @@ TABLE_HAND_STATS_TEMPLATE="
                       </tr>
 "
 
-# format the big numbers
+# format the big omaha numbers
 FULL_HOUSE_OMAHA=$(printf "%'d" $FULL_HOUSE_OMAHA)
 FLUSH_OMAHA=$(printf "%'d" $FLUSH_OMAHA)
 STRAIGHT_OMAHA=$(printf "%'d" $STRAIGHT_OMAHA)
@@ -439,7 +441,7 @@ TWO_PAIR_OMAHA=$(printf "%'d" $TWO_PAIR_OMAHA)
 PAIR_OMAHA=$(printf "%'d" $PAIR_OMAHA)
 HIGH_CARD_OMAHA=$(printf "%'d" $HIGH_CARD_OMAHA)
 
-# format the little numbers
+# format the little omaha numbers
 ROYAL_FLUSH_OMAHA_PCT=$(printf "%.4f" $ROYAL_FLUSH_OMAHA_PCT)
 STRAIGHT_FLUSH_OMAHA_PCT=$(printf "%.4f" $STRAIGHT_FLUSH_OMAHA_PCT)
 QUADS_OMAHA_PCT=$(printf "%.4f" $QUADS_OMAHA_PCT)
