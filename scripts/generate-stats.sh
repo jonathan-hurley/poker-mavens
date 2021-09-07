@@ -22,7 +22,7 @@ echo
 grep -l "Starting tournament" $PM_DATA_HAND_HISTORY_DIR/* | xargs -r -d "\n" cp -t $TOURNMANENT_TEMP_DIR
 grep -L "Starting tournament" $PM_DATA_HAND_HISTORY_DIR/* | xargs -r -d "\n" cp -t $CASH_TEMP_DIR
 egrep -l -m 1 "Game: (.*?)Hold'em" $PM_DATA_HAND_HISTORY_DIR/* | xargs -r -d "\n" cp -t $HOLDEM_TEMP_DIR
-egrep -l -m 1 "Game: (.*?)Omaha" $PM_DATA_HAND_HISTORY_DIR/* | xargs -r -d "\n" cp -t $HOLDEM_TEMP_DIR
+egrep -l -m 1 "Game: (.*?)Omaha" $PM_DATA_HAND_HISTORY_DIR/* | xargs -r -d "\n" cp -t $OMAHA_TEMP_DIR
 
 GREP_FILE_PATTERN_TOURNAMENT="$TOURNMANENT_TEMP_DIR/*"
 GREP_FILE_PATTERN_CASH="$CASH_TEMP_DIR/*"
