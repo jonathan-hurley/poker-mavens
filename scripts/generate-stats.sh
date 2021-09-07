@@ -430,6 +430,24 @@ TABLE_HAND_STATS_TEMPLATE="
                       </tr>
 "
 
+# format the big numbers
+FULL_HOUSE_OMAHA=$(printf "%'d" $FULL_HOUSE_OMAHA)
+FLUSH_OMAHA=$(printf "%'d" $FLUSH_OMAHA)
+STRAIGHT_OMAHA=$(printf "%'d" $STRAIGHT_OMAHA)
+THREE_KIND_OMAHA=$(printf "%'d" $THREE_KIND_OMAHA)
+TWO_PAIR_OMAHA=$(printf "%'d" $TWO_PAIR_OMAHA)
+PAIR_OMAHA=$(printf "%'d" $PAIR_OMAHA)
+HIGH_CARD_OMAHA=$(printf "%'d" $HIGH_CARD_OMAHA)
+
+# format the little numbers
+ROYAL_FLUSH_OMAHA_PCT=$(printf "%.4f" $ROYAL_FLUSH_OMAHA_PCT)
+STRAIGHT_FLUSH_OMAHA_PCT=$(printf "%.4f" $STRAIGHT_FLUSH_OMAHA_PCT)
+QUADS_OMAHA_PCT=$(printf "%.4f" $QUADS_OMAHA_PCT)
+FULL_HOUSE_OMAHA_PCT=$(printf "%.3f" $FULL_HOUSE_OMAHA_PCT)
+FLUSH_OMAHA_PCT=$(printf "%.3f" $FLUSH_OMAHA_PCT)
+STRAIGHT_OMAHA_PCT=$(printf "%.3f" $STRAIGHT_OMAHA_PCT)
+THREE_KIND_OMAHA_PCT=$(printf "%.3f" $THREE_KIND_OMAHA_PCT)
+
 # omaha ranking template
 TABLE_HAND_STATS_OMAHA_TEMPLATE="
                       <tr class=\"row100 body\">
