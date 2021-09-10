@@ -257,15 +257,16 @@ th, td {
   vertical-align: middle;
 }
 
-.winnings-column1 {
-  width: 50%;
-  padding-left: 40px;
+.winnings-column-header {
+  width: 25%;
   vertical-align: middle;
+  text-align: center
 }
 
-.winnings-column2 {
-  width: 50%;
+.winnings-cell {
+  width: 25%;
   vertical-align: middle;
+  text-align: center
 }
 
 .playerstats-column-header {

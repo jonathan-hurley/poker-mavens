@@ -60,8 +60,10 @@ do
 
   ROW_TEMPLATE="
                       <tr class=\"row100 body\">
-                        <td class=\"cell100 winnings-column1\">$PLAYER</td>
-                        <td class=\"cell100 winnings-column2\"><span class="currency">$PLAYER_TOURNAMENT_WINNINGS</span> | <span class="currency">$PLAYER_PROFIT</span></td>
+                        <td class=\"cell100 winnings-cell\">$PLAYER</td>
+                        <td class=\"cell100 winnings-cell\"><span class="currency">$PLAYER_TOURNAMENT_WINNINGS</span></td>
+                        <td class=\"cell100 winnings-cell\"><span class="currency">$PLAYER_PROFIT</span></td>
+                        <td class=\"cell100 winnings-cell\">$PLAYER_TOURNAMENT_CASHES</td>
                       </tr>
 "
   TOURNAMENT_TABLE_BODY="$TOURNAMENT_TABLE_BODY $ROW_TEMPLATE"
