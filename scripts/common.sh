@@ -60,7 +60,7 @@ function calculatePlayerBuyInTotal(){
   fi
   
   while read -r TOURNAMENT_FILE; do
-    BUY_IN=`egrep -h "BuyIn" "$TOURNAMENT_FILE" | egrep -oe "[0-9|.]+\+[0-9]+" | bc`
+    BUY_IN=`egrep -h "BuyIn" "$TOURNAMENT_FILE" | egrep -oe "[0-9|.]+\+[0-9]+" | awk '{s+=$1} END {print s}' | bc`
     REBUYS=`egrep -h "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | egrep -oe "Rebuys:[0-9]+" | tr -d 'Rebuys:'`
     if [[ -z $REBUYS ]]; then
       REBUYS=0

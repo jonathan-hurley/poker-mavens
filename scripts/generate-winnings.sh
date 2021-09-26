@@ -34,7 +34,7 @@ do
   CASH_TABLE_BODY="$CASH_TABLE_BODY $ROW_TEMPLATE"
 done
 
-echo -e "\n========= TOURNAMENT NET ========="
+echo -e "\n========= TOURNAMENT GROSS ========="
 
 # now generate for tournament
 TOURNAMENT_TABLE_BODY=
