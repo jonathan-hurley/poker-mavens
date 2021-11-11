@@ -47,10 +47,15 @@ FLOPS_SEEN_PCT=$(bc <<< "scale=4; x = $FLOPS_SEEN / $TABLE_HANDS * 100; scale = 
 FLOPS_WITH_SAME_SUIT=`egrep -he '\*\* Flop \*\* (?:\[\ws \ws \ws\]|\[\wh \wh \wh\]|\[\wc \wc \wc\]|\[\wd \wd \wd\])' $GREP_FILE_PATTERN_ALL | wc -l`
 FLOPS_WITH_SAME_SUIT_PCT=$(bc <<< "scale=4; x = $FLOPS_WITH_SAME_SUIT / $FLOPS_SEEN * 100; scale = 2; x / 1")
 
-AK_HANDS_WON=`egrep -h "^.* \(\+.*\) (\[A\w K\w\]|\[K\w A\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
-AK_HANDS_LOST=`egrep -h "^.* \(\-.*\) (\[A\w K\w\]|\[K\w A\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
-AK_HANDS_TOTAL=$(($AK_HANDS_WON+$AK_HANDS_LOST))
+AK_HANDS_TOTAL=`egrep -h "^.* \(.*\) (\[A\w K\w\]|\[K\w A\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
+AK_HANDS_LOST=`egrep -h "^.* (\(\-.*\)|\(\+0\)) (\[A\w K\w\]|\[K\w A\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
+AK_HANDS_WON=$(($AK_HANDS_TOTAL-$AK_HANDS_LOST))
 AK_HANDS_WON_PCT=$(bc <<< "scale=2; x = $AK_HANDS_WON/$AK_HANDS_TOTAL * 100; scale = 0; x / 1")
+
+SEVENTWO_HANDS_TOTAL=`egrep -h "^.* \(.*\) (\[7\w 2\w\]|\[2\w 7\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
+SEVENTWO_HANDS_LOST=`egrep -h "^.* (\(\-.*\)|\(\+0\)) (\[7\w 2\w\]|\[2\w 7\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
+SEVENTWO_HANDS_WON=$(($SEVENTWO_HANDS_TOTAL-$SEVENTWO_HANDS_LOST))
+SEVENTWO_HANDS_WON_PCT=$(bc <<< "scale=2; x = $SEVENTWO_HANDS_WON/$SEVENTWO_HANDS_TOTAL * 100; scale = 0; x / 1")
 
 # Hold'em hand ranking stats
 if [[ $TOTAL_PLAYER_HANDS_HOLDEM -gt 0 ]]; then
@@ -354,8 +359,14 @@ SITE_STATS_TEMPLATE="
                         <td class=\"cell100 stats-column2\">$POCKET_AA ($POCKET_AA_PCT%)</td>
                       </tr>
                       <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Ace King Wins</td>
-                        <td class=\"cell100 stats-column2\">$AK_HANDS_WON ($AK_HANDS_WON_PCT%)</td>
+                        <td class=\"cell100 stats-column1\">
+                          AK Wins<br/>
+                          72 Wins
+                        </td>
+                        <td class=\"cell100 stats-column2\">
+                          $AK_HANDS_WON ($AK_HANDS_WON_PCT%)<br/>
+                          $SEVENTWO_HANDS_WON ($SEVENTWO_HANDS_WON_PCT%)
+                        </td>
                       </tr>
                       <tr class=\"row100 body\">
                         <td class=\"cell100 stats-column1\">Cash Hand Summary</td>
