@@ -71,12 +71,13 @@ for i in "${!PLAYERS[@]}"; do
   PLAYER_MOST_COMMON_HAND_COUNT=0
   PLAYER_LEAST_COMMON_HAND_COUNT=99999
 
+  PLAYER_TOTAL_HANDS_DEALT=`egrep -he "Seat.*$PLAYER \(.*\) \[.*\]" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
+
   PLAYER_ALL_TRS=""
   for FIRST_CARD in "${HANDS[@]}"
   do
     ROW_TR="<tr class=\"row100 body\">_PLAYER_TD_</tr>"
-    ROW_ALL_TDS="<td class=\"playerpocketpair-cell\">$FIRST_CARD</td>"
-    PLAYER_TOTAL_HANDS_DEALT=`egrep -he "Seat.*$PLAYER \(.*\) \[.*\]" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
+    ROW_ALL_TDS="<td class=\"playerpocketpair-cell\">$FIRST_CARD</td>"    
 
     if [[ $PLAYER_TOTAL_HANDS_DEALT -eq 0 ]]; then
       echo "[$NOW] Player $PLAYER has not played any hands yet!"
@@ -85,7 +86,7 @@ for i in "${!PLAYERS[@]}"; do
 
     for SECOND_CARD in "${HANDS[@]}"
     do      
-      PLAYER_HOLE_CARD_COUNT=`egrep -oh "$PLAYER \(.*\) (\[$FIRST_CARD\w $SECOND_CARD\w\]|\[$SECOND_CARD\w $FIRST_CARD\w\])" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
+      PLAYER_HOLE_CARD_COUNT=`egrep -oh "$PLAYER \(.*\) (\[$FIRST_CARD\w $SECOND_CARD\w\])" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
       PLAYER_HOLE_CARD_COUNT_PCT=$(bc <<< "scale=4; x = $PLAYER_HOLE_CARD_COUNT / $PLAYER_TOTAL_HANDS_DEALT * 100; scale = 2; x / 1")
       ROW_ALL_TDS="$ROW_ALL_TDS <td class=\"playerstats-cell\">$PLAYER_HOLE_CARD_COUNT<br/>($PLAYER_HOLE_CARD_COUNT_PCT%)</td>"
 
