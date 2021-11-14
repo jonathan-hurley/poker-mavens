@@ -1,22 +1,18 @@
 #!/usr/bin/env bash
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-. "$DIR/common.sh"
-
-DATE=`date "+Generated on %B %d, %Y"`
-
-GREP_FILE_PATTERN_ALL="$PM_DATA_HAND_HISTORY_DIR/*"
+. "$DIR/common-db.sh"
 
 HANDS=( "A" "K" "Q" "J" "T" "9" "8" "7" "6" "5" "4" "3" "2" )
+
+# now that the databae is done, let's generate HTML
+DATE=`date "+Generated on %B %d, %Y"`
 
 PLAYER_NAV_BODY=""
 ALL_PLAYERS_BODY=""
 
-echo "=========   PLAYER HANDS   ========="
 for i in "${!PLAYERS[@]}"; do 
   PLAYER="${PLAYERS[$i]}"
-  NOW="$(date +'%I:%M:%S')"
-  echo "[$NOW] Processing hole cards for $PLAYER ..."
 
   # first pill selected
   ACTIVE=""
@@ -71,22 +67,23 @@ for i in "${!PLAYERS[@]}"; do
   PLAYER_MOST_COMMON_HAND_COUNT=0
   PLAYER_LEAST_COMMON_HAND_COUNT=99999
 
-  PLAYER_TOTAL_HANDS_DEALT=`egrep -he "Seat.*$PLAYER \(.*\) \[.*\]" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
-
   PLAYER_ALL_TRS=""
+
+  # fetch total of all hands dealt for this player
+  PLAYER_TOTAL_HANDS_DEALT_SQL=$(getPlayerStatFromDB "$PLAYER" "total_hands_dealt")
+  if [[ $TOTAL_PLAYER_HANDS_HOLDEM -eq 0 ]]; then
+    continue
+  fi
+  
   for FIRST_CARD in "${HANDS[@]}"
   do
     ROW_TR="<tr class=\"row100 body\">_PLAYER_TD_</tr>"
     ROW_ALL_TDS="<td class=\"playerpocketpair-cell\">$FIRST_CARD</td>"    
-
-    if [[ $PLAYER_TOTAL_HANDS_DEALT -eq 0 ]]; then
-      echo "[$NOW] Player $PLAYER has not played any hands yet!"
-      break
-    fi
-
     for SECOND_CARD in "${HANDS[@]}"
-    do      
-      PLAYER_HOLE_CARD_COUNT=`egrep -oh "$PLAYER \(.*\) (\[$FIRST_CARD\w $SECOND_CARD\w\])" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
+    do
+      PLAYER_HOLE_CARD_COUNT_SQL="SELECT cards_$FIRST_CARD$SECOND_CARD FROM player_hands WHERE name = '$PLAYER'"
+      PLAYER_HOLE_CARD_COUNT=`executeSQL "$PLAYER_HOLE_CARD_COUNT_SQL"`
+      
       PLAYER_HOLE_CARD_COUNT_PCT=$(bc <<< "scale=4; x = $PLAYER_HOLE_CARD_COUNT / $PLAYER_TOTAL_HANDS_DEALT * 100; scale = 2; x / 1")
       ROW_ALL_TDS="$ROW_ALL_TDS <td class=\"playerstats-cell\">$PLAYER_HOLE_CARD_COUNT<br/>($PLAYER_HOLE_CARD_COUNT_PCT%)</td>"
 

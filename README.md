@@ -36,6 +36,7 @@ Depending on which operating system you are using, you may need to download one 
 - `python`
 - `git`
 - `tidy`
+- `sqlite3`
 
 ### Linux & MacOS
 Both Linux and MacOS should ship with the necessary CLI tools already. If running on MacOS, you can always use [brew](https://brew.sh/) to install the necessary dependencies
@@ -53,6 +54,7 @@ Some users, especially those want to run this directly on their AWS EC2 instance
    - [`bc`](http://gnuwin32.sourceforge.net/packages/bc.htm): download the Windows installer and run it in order to install `bc`.
    - [`python`](https://www.python.org/downloads/windows/): download the latest v3 Python release for Windows and install it.
    - [`tidy`](http://binaries.html-tidy.org/): download the the latest version of `tidy` (as of this writing it was [`tidy-5.8.0-win64.exe`](https://github.com/htacg/tidy-html5/releases/download/5.8.0/tidy-5.8.0-win64.exe))
+   - [`sqlite3`](https://www.sqlite.org/download.html): download both the DLL and the command line tools for Windows. Extract the files to a location on your computer, and then add them to your path. You should be able to test that `sqlite3` is working by typing in `sqlite3 --version`.
 
 3. You can choose to modify the following files to better customize your results:
      - `images/logo.png`: this is the logo that is generated at the top of all HTML files
@@ -83,10 +85,12 @@ You should be able to the run the scripts using `Git Bash` and executing the `ge
 $ ./scripts/generate.sh 
 ```
 
+The first time that you run the script, it will take a very long time as it is seeding the database with all of the prior history. One you have run the scripts once, subsequent runs only process the incremental changes and are much faster.
+
 Output files are placed in the `web` folder:
 - `web/stats.html`: site and player hand statistics
 - `web/winnings-results.html`: total player profits/winnings between cash and tournament
-- `web/player-cards.html` (optional): the script for this is disabled by default because of how long it takes, but this represents all hole card combinations dealt to a player.
+- `web/player-cards.html`: all hole card combinations dealt to a player
 
 
 ## Directory Structure
@@ -97,6 +101,7 @@ The shell scripts located in `scripts` are used to generate static HTML pages th
 
 - `config.sh`: environment variables for path locations, custom text, etc
 - `common.sh`: functions that are reused across other script files for calculations and parsing
+- `common-db.sh`: functions that are reused across other script files for accessing the database
 - `generate-buy-ins.sh`: determines how much a player has spent on tournament buy-ins
 - `generate-player-hands.sh`: creates a 13x13 matrix of every pocket hole card combination for each player and tallies the number of times they have received it. This is a very intensive script and takes a long time to run.
   - outputs: `web/player-cards.html`
@@ -110,6 +115,7 @@ The shell scripts located in `scripts` are used to generate static HTML pages th
     - `web/winnings-results.html`
 - `hands-played.py`: calculates how many hands a player was dealt, folded, played, etc
 - `players-template.sh`: an example template of a list of the players to run the program for as well as any offsets to calculate into their totals. This is only a template; you can copy this to a brand new file called `players.sh` and edit that one.
+- `sync-database.sh`: contains all of the logic to query the logs & history files and then update the database
 
 ### Templates (`./templates`)
 The HTML files located in `templates` are used as template files when rendering the static HTML pages.

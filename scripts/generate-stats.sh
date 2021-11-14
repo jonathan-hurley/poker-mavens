@@ -1,132 +1,59 @@
 #!/usr/bin/env bash
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+. "$DIR/players.sh"
 . "$DIR/common.sh"
 
 DATE=`date "+Generated on %B %d, %Y"`
 
-# copy the files we care about to temp directories for easier grep'ing later
-TOURNMANENT_TEMP_DIR=`mktemp -d`
-CASH_TEMP_DIR=`mktemp -d`
-HOLDEM_TEMP_DIR=`mktemp -d`
-OMAHA_TEMP_DIR=`mktemp -d`
-echo "=========   PREPARING   ========="
-echo "Copying files from $PM_DATA_HAND_HISTORY_DIR to temp directories..."
-echo "  Cash       -> $CASH_TEMP_DIR"
-echo "  Tournament -> $TOURNMANENT_TEMP_DIR"
-echo "  Hold 'Em -> $HOLDEM_TEMP_DIR"
-echo "  Omaha -> $OMAHA_TEMP_DIR"
-echo 
-
-# copy PM files out to directories for easier grep'ing
-grep -l "Starting tournament" $PM_DATA_HAND_HISTORY_DIR/* | xargs -r -d "\n" cp -t $TOURNMANENT_TEMP_DIR
-grep -L "Starting tournament" $PM_DATA_HAND_HISTORY_DIR/* | xargs -r -d "\n" cp -t $CASH_TEMP_DIR
-egrep -l -m 1 "Game: (.*?)Hold'em" $PM_DATA_HAND_HISTORY_DIR/* | xargs -r -d "\n" cp -t $HOLDEM_TEMP_DIR
-egrep -l -m 1 "Game: (.*?)Omaha" $PM_DATA_HAND_HISTORY_DIR/* | xargs -r -d "\n" cp -t $OMAHA_TEMP_DIR
-
-GREP_FILE_PATTERN_TOURNAMENT="$TOURNMANENT_TEMP_DIR/*"
-GREP_FILE_PATTERN_CASH="$CASH_TEMP_DIR/*"
-GREP_FILE_PATTERN_HOLDEM="$HOLDEM_TEMP_DIR/*"
-GREP_FILE_PATTERN_OMAHA="$OMAHA_TEMP_DIR/*"
-
-GREP_FILE_PATTERN_ALL="$PM_DATA_HAND_HISTORY_DIR/*"
-GREP_FILE_PATTERN_TOURNAMENT_RESULTS="$PM_DATA_TOURNEY_DIR/*"
-
 HANDS=( "A" "K" "Q" "J" "T" "9" "8" "7" "6" "5" "4" "3" "2" )
 
-TOTAL_PLAYER_HANDS=`egrep -he 'Seat.*\[(\w| )+]' $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
-TOTAL_PLAYER_HANDS_HOLDEM=`egrep -he 'Seat.*\[\w\w \w\w\]' $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
-TOTAL_PLAYER_HANDS_OMAHA=`egrep -he 'Seat.*\[\w\w \w\w\ \w\w\ \w\w\]' $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
-
-TABLE_HANDS=`egrep -he 'Hand #' $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
-TABLE_HANDS_CASH=`egrep -he 'Hand #' $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
-TABLE_HANDS_TOURNAMENT=`egrep -he 'Hand #' $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
-
-FLOPS_SEEN=`egrep -he '\*\* Flop \*\*' $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
 FLOPS_SEEN_PCT=$(bc <<< "scale=4; x = $FLOPS_SEEN / $TABLE_HANDS * 100; scale = 2; x / 1")
-FLOPS_WITH_SAME_SUIT=`egrep -he '\*\* Flop \*\* (?:\[\ws \ws \ws\]|\[\wh \wh \wh\]|\[\wc \wc \wc\]|\[\wd \wd \wd\])' $GREP_FILE_PATTERN_ALL | wc -l`
 FLOPS_WITH_SAME_SUIT_PCT=$(bc <<< "scale=4; x = $FLOPS_WITH_SAME_SUIT / $FLOPS_SEEN * 100; scale = 2; x / 1")
-
-AK_HANDS_TOTAL=`egrep -h "^.* \(.*\) (\[A\w K\w\]|\[K\w A\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
-AK_HANDS_LOST=`egrep -h "^.* (\(\-.*\)|\(\+0\)) (\[A\w K\w\]|\[K\w A\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
 AK_HANDS_WON=$(($AK_HANDS_TOTAL-$AK_HANDS_LOST))
 AK_HANDS_WON_PCT=$(bc <<< "scale=2; x = $AK_HANDS_WON/$AK_HANDS_TOTAL * 100; scale = 0; x / 1")
-
-SEVENTWO_HANDS_TOTAL=`egrep -h "^.* \(.*\) (\[7\w 2\w\]|\[2\w 7\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
-SEVENTWO_HANDS_LOST=`egrep -h "^.* (\(\-.*\)|\(\+0\)) (\[7\w 2\w\]|\[2\w 7\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
 SEVENTWO_HANDS_WON=$(($SEVENTWO_HANDS_TOTAL-$SEVENTWO_HANDS_LOST))
 SEVENTWO_HANDS_WON_PCT=$(bc <<< "scale=2; x = $SEVENTWO_HANDS_WON/$SEVENTWO_HANDS_TOTAL * 100; scale = 0; x / 1")
 
 # Hold'em hand ranking stats
 if [[ $TOTAL_PLAYER_HANDS_HOLDEM -gt 0 ]]; then
-  ROYAL_FLUSHES=`egrep -he '.*shows.*Royal' $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
   ROYAL_FLUSH_PCT=$(bc <<< "scale=6; x = $ROYAL_FLUSHES / $TOTAL_PLAYER_HANDS_HOLDEM * 100; scale = 4; x / 1")
-  POCKET_AA=`egrep -he 'Seat.*\[A\w A\w\]' $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
   POCKET_AA_PCT=$(bc <<< "scale=4; x = $POCKET_AA / $TOTAL_PLAYER_HANDS_HOLDEM * 100; scale = 2; x / 1")
-  STRAIGHT_FLUSH=`egrep -he '.*shows.*Straight Flush' $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
   STRAIGHT_FLUSH_PCT=$(bc <<< "scale=6; x = $STRAIGHT_FLUSH / $TOTAL_PLAYER_HANDS_HOLDEM * 100; scale = 4; x / 1")
-  QUADS=`egrep -he '.*shows.*Four of a Kind' $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
   QUADS_PCT=$(bc <<< "scale=6; x = $QUADS / $TOTAL_PLAYER_HANDS_HOLDEM * 100; scale = 4; x / 1")
-  FULL_HOUSE=`egrep -he '.*shows.*Full House' $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
   FULL_HOUSE_PCT=$(bc <<< "scale=6; x = $FULL_HOUSE / $TOTAL_PLAYER_HANDS_HOLDEM * 100; scale = 4; x / 1")
-  FLUSH=`egrep -he '.*shows.*Flush' $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
   FLUSH_PCT=$(bc <<< "scale=6; x = $FLUSH / $TOTAL_PLAYER_HANDS_HOLDEM * 100; scale = 4; x / 1")
-  STRAIGHT=`egrep -he '.*shows.*Straight' $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
   STRAIGHT_PCT=$(bc <<< "scale=6; x = $STRAIGHT / $TOTAL_PLAYER_HANDS_HOLDEM * 100; scale = 4; x / 1")
-  THREE_KIND=`egrep -he '.*shows.*Three of a Kind' $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
   THREE_KIND_PCT=$(bc <<< "scale=6; x = $THREE_KIND / $TOTAL_PLAYER_HANDS_HOLDEM * 100; scale = 4; x / 1")
-  TWO_PAIR=`egrep -he '.*shows.*Two Pair' $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
   TWO_PAIR_PCT=$(bc <<< "scale=4; x = $TWO_PAIR / $TOTAL_PLAYER_HANDS_HOLDEM * 100; scale = 2; x / 1")
-  PAIR=`egrep -he '.*shows.*a Pair' $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
   PAIR_PCT=$(bc <<< "scale=4; x = $PAIR / $TOTAL_PLAYER_HANDS_HOLDEM * 100; scale = 2; x / 1")
-  HIGH_CARD=`egrep -he '.*shows.*High Card' $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
   HIGH_CARD_PCT=$(bc <<< "scale=4; x = $HIGH_CARD / $TOTAL_PLAYER_HANDS_HOLDEM * 100; scale = 2; x / 1")
 fi
 
 # omaha hand ranking stats
 if [[ $TOTAL_PLAYER_HANDS_OMAHA -gt 0 ]]; then
-  ROYAL_FLUSHES_OMAHA=`egrep -he '.*shows.*Royal' $GREP_FILE_PATTERN_OMAHA | wc -l | sed -e 's/^[[:space:]]*//'`
   ROYAL_FLUSH_OMAHA_PCT=$(bc <<< "scale=6; x = $ROYAL_OMAHA_FLUSHES / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
-  STRAIGHT_FLUSH_OMAHA=`egrep -he '.*shows.*Straight Flush' $GREP_FILE_PATTERN_OMAHA | wc -l | sed -e 's/^[[:space:]]*//'`
   STRAIGHT_FLUSH_OMAHA_PCT=$(bc <<< "scale=6; x = $STRAIGHT_OMAHA_FLUSH / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
-  QUADS_OMAHA=`egrep -he '.*shows.*Four of a Kind' $GREP_FILE_PATTERN_OMAHA | wc -l | sed -e 's/^[[:space:]]*//'`
   QUADS_OMAHA_PCT=$(bc <<< "scale=6; x = $QUADS_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
-  FULL_HOUSE_OMAHA=`egrep -he '.*shows.*Full House' $GREP_FILE_PATTERN_OMAHA | wc -l | sed -e 's/^[[:space:]]*//'`
   FULL_HOUSE_OMAHA_PCT=$(bc <<< "scale=6; x = $FULL_HOUSE_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
-  FLUSH_OMAHA=`egrep -he '.*shows.*Flush' $GREP_FILE_PATTERN_OMAHA | wc -l | sed -e 's/^[[:space:]]*//'`
   FLUSH_OMAHA_PCT=$(bc <<< "scale=6; x = $FLUSH_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
-  STRAIGHT_OMAHA=`egrep -he '.*shows.*Straight' $GREP_FILE_PATTERN_OMAHA | wc -l | sed -e 's/^[[:space:]]*//'`
   STRAIGHT_OMAHA_PCT=$(bc <<< "scale=6; x = $STRAIGHT_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
-  THREE_KIND_OMAHA=`egrep -he '.*shows.*Three of a Kind' $GREP_FILE_PATTERN_OMAHA | wc -l | sed -e 's/^[[:space:]]*//'`
   THREE_KIND_OMAHA_PCT=$(bc <<< "scale=6; x = $THREE_KIND_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
-  TWO_PAIR_OMAHA=`egrep -he '.*shows.*Two Pair' $GREP_FILE_PATTERN_OMAHA | wc -l | sed -e 's/^[[:space:]]*//'`
   TWO_PAIR_OMAHA_PCT=$(bc <<< "scale=4; x = $TWO_PAIR_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 2; x / 1")
-  PAIR_OMAHA=`egrep -he '.*shows.*a Pair' $GREP_FILE_PATTERN_OMAHA | wc -l | sed -e 's/^[[:space:]]*//'`
   PAIR_OMAHA_PCT=$(bc <<< "scale=4; x = $PAIR_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 2; x / 1")
-  HIGH_OMAHA_CARD=`egrep -he '.*shows.*High Card' $GREP_FILE_PATTERN_OMAHA | wc -l | sed -e 's/^[[:space:]]*//'`
   HIGH_OMAHA_CARD_PCT=$(bc <<< "scale=4; x = $HIGH_CARD_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 2; x / 1")
 fi
 
 # showdown stats
-HAND_ENDS_PREFLOP_TOURNAMENT=`egrep -he 'End: PreFlop' $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
 HAND_ENDS_PREFLOP_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_PREFLOP_TOURNAMENT / $TABLE_HANDS_TOURNAMENT * 100; scale = 2; x / 1")
-HAND_ENDS_FLOP_TOURNAMENT=`egrep -he 'End: Flop' $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
 HAND_ENDS_FLOP_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_FLOP_TOURNAMENT / $TABLE_HANDS_TOURNAMENT * 100; scale = 2; x / 1")
-HAND_ENDS_TURN_TOURNAMENT=`egrep -he 'End: Turn' $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
 HAND_ENDS_TURN_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_TURN_TOURNAMENT / $TABLE_HANDS_TOURNAMENT * 100; scale = 2; x / 1")
-HAND_ENDS_RIVER_TOURNAMENT=`egrep -he 'End: River' $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
 HAND_ENDS_RIVER_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_RIVER_TOURNAMENT / $TABLE_HANDS_TOURNAMENT * 100; scale = 2; x / 1")
-HAND_ENDS_SHOWDOWN_TOURNAMENT=`egrep -he 'End: Showdown' $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
 HAND_ENDS_SHOWDOWN_TOURNAMENT_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_SHOWDOWN_TOURNAMENT / $TABLE_HANDS_TOURNAMENT * 100; scale = 2; x / 1")
-HAND_ENDS_PREFLOP_CASH=`egrep -he 'End: PreFlop' $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
 HAND_ENDS_PREFLOP_CASH_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_PREFLOP_CASH / $TABLE_HANDS_CASH * 100; scale = 2; x / 1")
-HAND_ENDS_FLOP_CASH=`egrep -he 'End: Flop' $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
 HAND_ENDS_FLOP_CASH_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_FLOP_CASH / $TABLE_HANDS_CASH * 100; scale = 2; x / 1")
-HAND_ENDS_TURN_CASH=`egrep -he 'End: Turn' $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
 HAND_ENDS_TURN_CASH_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_TURN_CASH / $TABLE_HANDS_CASH * 100; scale = 2; x / 1")
-HAND_ENDS_RIVER_CASH=`egrep -he 'End: River' $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
 HAND_ENDS_RIVER_CASH_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_RIVER_CASH / $TABLE_HANDS_CASH * 100; scale = 2; x / 1")
-HAND_ENDS_SHOWDOWN_CASH=`egrep -he 'End: Showdown' $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
 HAND_ENDS_SHOWDOWN_CASH_PCT=$(bc <<< "scale=4; x = $HAND_ENDS_SHOWDOWN_CASH / $TABLE_HANDS_CASH * 100; scale = 2; x / 1")
 
 echo "========= SITE STATISTICS ========="
@@ -152,27 +79,47 @@ TWO_PAIR=$(printf "%'d" $TWO_PAIR)
 PAIR=$(printf "%'d" $PAIR)
 HIGH_CARD=$(printf "%'d" $HIGH_CARD)
 AK_HANDS_WON=$(printf "%'d" $AK_HANDS_WON)
+SEVENTWO_HANDS_WON=$(printf "%'d" $SEVENTWO_HANDS_WON)
 
 TABLE_BODY=""
 PLAYER_POCKET_PAIRS_BODY=""
-PLAYERS_SUMMARY="\n========= TOURNAMENT WINNINGS =========\n"
+PLAYERS_SUMMARY="========= TOURNAMENT WINNINGS =========\n"
 
-echo -e "\n=========  PLAYER STATISTICS  ========="
+echo ""
+echo "=========  PLAYER STATISTICS  ========="
 for PLAYER in "${PLAYERS[@]}"
 do
   NOW="$(date +'%I:%M:%S')"
-  echo "[$NOW] Processing all hands for $PLAYER ..."
+  echo "[$NOW] → Rendering all hands for $PLAYER ..."
   
-  PPP_ROW_TEMPLATE="<tr class=\"row100 body\"><td class=\"playerpocketpair-cell\">$PLAYER</td>"
+  # read all player stats from the DB
+  # if this player has no cards, don't do anything
+  PLAYER_TOTAL_HANDS_DEALT=$(getPlayerStatFromDB "$PLAYER" "total_hands_dealt")
+  if [[ $PLAYER_TOTAL_HANDS_DEALT == 0 ]]; then
+    continue
+  fi
 
-  PLAYER_FOLDED_HANDS_TOURNAMENT=`egrep -he "$PLAYER folds" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
-  PLAYER_SHOWN_HANDS_TOURNAMENT=`egrep -he "$PLAYER shows" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
-  PLAYER_REFUNDED_HANDS_TOURNAMENT=`egrep -he "$PLAYER refunded" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
-  PLAYER_WON_HANDS_TOURNAMENT=`egrep -he "$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
-  PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT=`egrep -he "$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_TOURNAMENT | egrep -o "\(.*\)" | egrep -oe '\([0-9]{2,}\.?.*\)' | tr -d '()' | awk '{s+=$1} END {print s}'`
-  PLAYER_ALL_INS_TOURNAMENT=`egrep -he "$PLAYER .*(All-in)" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
-  PLAYER_HANDS_PLAYED_TOURNAMENT=`python scripts/hands-played.py --player $PLAYER --pattern "$GREP_FILE_PATTERN_TOURNAMENT"`
-  PLAYER_NUMBER_OF_TOURNAMENTS=`egrep -he "=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | wc -l | sed -e 's/^[[:space:]]*//'`
+  # player tournament stats
+  PLAYER_FOLDED_HANDS_TOURNAMENT=$(getPlayerStatFromDB "$PLAYER" "folded_hands_tournament")
+  PLAYER_SHOWN_HANDS_TOURNAMENT=$(getPlayerStatFromDB "$PLAYER" "shown_hands_tournament")
+  PLAYER_REFUNDED_HANDS_TOURNAMENT=$(getPlayerStatFromDB "$PLAYER" "refunded_hands_tournament")
+  PLAYER_WON_HANDS_TOURNAMENT=$(getPlayerStatFromDB "$PLAYER" "won_hands_tournament")
+  PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT=$(getPlayerStatFromDB "$PLAYER" "total_won_pot_size_tournament")
+  PLAYER_ALL_INS_TOURNAMENT=$(getPlayerStatFromDB "$PLAYER" "all_ins_tournament")
+  PLAYER_HANDS_PLAYED_TOURNAMENT=$(getPlayerStatFromDB "$PLAYER" "hands_played_tournament")
+  PLAYER_NUMBER_OF_TOURNAMENTS=$(getPlayerStatFromDB "$PLAYER" "tournaments_entered")
+
+  # player cash stats
+  PLAYER_FOLDED_HANDS_CASH=$(getPlayerStatFromDB "$PLAYER" "folded_hands_cash")
+  PLAYER_SHOWN_HANDS_CASH=$(getPlayerStatFromDB "$PLAYER" "shown_hands_cash")
+  PLAYER_REFUNDED_HANDS_CASH=$(getPlayerStatFromDB "$PLAYER" "refunded_hands_cash")
+  PLAYER_WON_HANDS_CASH=$(getPlayerStatFromDB "$PLAYER" "won_hands_cash")
+  PLAYER_TOTAL_WON_POT_SIZE_CASH=$(getPlayerStatFromDB "$PLAYER" "total_won_pot_size_cash")
+  PLAYER_ALL_INS_CASH=$(getPlayerStatFromDB "$PLAYER" "all_ins_cash")
+  PLAYER_HANDS_PLAYED_CASH=$(getPlayerStatFromDB "$PLAYER" "hands_played_cash")  
+  PLAYER_BIGGEST_CASH_HAND=$(getPlayerStatFromDB "$PLAYER" "largest_pot_won_cash")
+
+  PPP_ROW_TEMPLATE="<tr class=\"row100 body\"><td class=\"playerpocketpair-cell\">$PLAYER</td>"
 
   # calculate tournament winnings
   PLAYER_TOURNAMENT_WINNINGS=$(calculatePlayerTournamentWinnings "$PLAYER")
@@ -182,14 +129,9 @@ do
     PLAYER_TOURNAMENT_CASHES=0
   fi
 
-  PLAYER_FOLDED_HANDS_CASH=`egrep -he "$PLAYER folds" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
-  PLAYER_SHOWN_HANDS_CASH=`egrep -he "$PLAYER shows" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
-  PLAYER_REFUNDED_HANDS_CASH=`egrep -he "$PLAYER refunded" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
-  PLAYER_WON_HANDS_CASH=`egrep -he "$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
-  PLAYER_TOTAL_WON_POT_SIZE_CASH=`egrep -he "$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_CASH | egrep -o "\(.*\)" | egrep -oe '\([0-9]{1,}\.?.*\)' | tr -d '()' | awk '{s+=$1} END {print s}'`
-  PLAYER_ALL_INS_CASH=`egrep -he "$PLAYER .*(All-in)" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
-  PLAYER_HANDS_PLAYED_CASH=`python scripts/hands-played.py --player $PLAYER --pattern "$GREP_FILE_PATTERN_CASH"`
-  PLAYER_BIGGEST_CASH_HAND=`egrep -ho "$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_CASH | egrep -o "\(.*\)" | egrep -o "[0-9,.]+" | sort -n | tail -n 1`
+  # debug
+  # echo "$PLAYER (T): folded: $PLAYER_FOLDED_HANDS_TOURNAMENT shown: $PLAYER_SHOWN_HANDS_TOURNAMENT refund: $PLAYER_REFUNDED_HANDS_TOURNAMENT"
+  # echo "$PLAYER (C): folded: $PLAYER_FOLDED_HANDS_CASH shown: $PLAYER_SHOWN_HANDS_CASH refund: $PLAYER_REFUNDED_HANDS_CASH"
 
   TOTAL_PLAYER_HANDS_DEALT_TOURNAMENT=$(($PLAYER_FOLDED_HANDS_TOURNAMENT + $PLAYER_SHOWN_HANDS_TOURNAMENT + $PLAYER_REFUNDED_HANDS_TOURNAMENT))
   TOTAL_PLAYER_HANDS_DEALT_CASH=$(($PLAYER_FOLDED_HANDS_CASH + $PLAYER_SHOWN_HANDS_CASH + $PLAYER_REFUNDED_HANDS_CASH))
@@ -291,9 +233,9 @@ do
   PLAYERS_SUMMARY="$PLAYERS_SUMMARY$PLAYER: \$$PLAYER_TOURNAMENT_WINNINGS ($PLAYER_WINNING_ODDS_PCT%)\n"
 
   # process per-player pocket pairs
-  for HAND in "${HANDS[@]}"
+  for CARD in "${HANDS[@]}"
   do
-    NUM_PLAYER_POCKET_PAIRS=`egrep -oh "$PLAYER \(.*\) \[$HAND\w $HAND\w\]" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
+    NUM_PLAYER_POCKET_PAIRS=$(getPlayerHandFromDB "$PLAYER" "cards_$CARD$CARD")
     PLAYER_POCKET_PAIR_PCT=0
     if [[ $TOTAL_PLAYER_HANDS_DEALT != 0 ]]; then
       PLAYER_POCKET_PAIR_PCT=$(bc <<< "scale=4; x = $NUM_PLAYER_POCKET_PAIRS / $TOTAL_PLAYER_HANDS_DEALT * 100; scale = 2; x / 1")
@@ -313,6 +255,7 @@ do
   PLAYER_POCKET_PAIRS_BODY="$PLAYER_POCKET_PAIRS_BODY $PPP_ROW_TEMPLATE</tr>"
 done
 
+echo ""
 echo -e "$PLAYERS_SUMMARY"
 
 STATS_HTML_CONTENT=$(awk -v r="$TABLE_BODY_TOURNAMENT" '{gsub(/_PLAYER_TOURNAMENT_STATS_BODY_/,r)}1' templates/stats.tmpl)
@@ -361,11 +304,11 @@ SITE_STATS_TEMPLATE="
                       <tr class=\"row100 body\">
                         <td class=\"cell100 stats-column1\">
                           AK Wins<br/>
-                          72 Wins
+                          72 Wins<br/>
                         </td>
                         <td class=\"cell100 stats-column2\">
                           $AK_HANDS_WON ($AK_HANDS_WON_PCT%)<br/>
-                          $SEVENTWO_HANDS_WON ($SEVENTWO_HANDS_WON_PCT%)
+                          $SEVENTWO_HANDS_WON ($SEVENTWO_HANDS_WON_PCT%)<br/>
                         </td>
                       </tr>
                       <tr class=\"row100 body\">
@@ -442,7 +385,6 @@ TABLE_HAND_STATS_TEMPLATE="
                         <td class=\"cell100 stats-column2\">$HIGH_CARD ($HIGH_CARD_PCT%)</td>
                       </tr>
 "
-
 # format the big omaha numbers
 FULL_HOUSE_OMAHA=$(printf "%'d" $FULL_HOUSE_OMAHA)
 FLUSH_OMAHA=$(printf "%'d" $FLUSH_OMAHA)
@@ -506,20 +448,19 @@ TABLE_HAND_STATS_OMAHA_TEMPLATE="
 "
 
 # find all pocket pair stats
-echo "=========  SITE POCKET PAIRS  ========="
-echo "[$(date +'%I:%M:%S')] Processing all site pocket pairs..."
+echo "[$(date +'%I:%M:%S')] → Rendering all site pocket pairs..."
 SITE_POCKET_PAIRS_BODY=""
-for HAND in "${HANDS[@]}"
+for CARD in "${HANDS[@]}"
 do
-  echo "[$(date +'%I:%M:%S')] Processing [$HAND $HAND]..."
-  POCKET_PAIR=`egrep -he "Seat.*\[$HAND\w $HAND\w\]" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
+  echo "[$(date +'%I:%M:%S')] Processing [$CARD $CARD]..."
+  POCKET_PAIR=$(getPocketPairStatFromDB "$CARD$CARD" "total")
   POCKET_PAIR_PCT=$(bc <<< "scale=4; x = $POCKET_PAIR / $TOTAL_PLAYER_HANDS_HOLDEM * 100; scale = 2; x / 1")
   POCKET_PAIR_PCT=$(printf "%.2f" $POCKET_PAIR_PCT)
-  POCKET_PAIR_ONE_IN=$(bc <<< "scale=4; x = $TOTAL_PLAYER_HANDS_HOLDEM/$POCKET_PAIR; scale = 0; x / 1")
+  POCKET_PAIR_ONE_IN=$(bc <<< "scale=4; x = $TOTAL_PLAYER_HANDS/$POCKET_PAIR; scale = 0; x / 1")
 
-  POCKET_PAIR_HANDS_WON=`egrep -h "^.* \(\+.*\) (\[$HAND\w $HAND\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
-  POCKET_PAIR_HANDS_WON_SHOWDOWN=`egrep -h "^.* \(\+.*\) (\[$HAND\w $HAND\w\]) Showdown" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
-  POCKET_PAIR_HANDS_LOST=`egrep -h "^.* \(\-.*\) (\[$HAND\w $HAND\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
+  POCKET_PAIR_HANDS_WON=$(getPocketPairStatFromDB "$CARD$CARD" "total_won")
+  POCKET_PAIR_HANDS_WON_SHOWDOWN=$(getPocketPairStatFromDB "$CARD$CARD" "total_won_at_showdown")
+  POCKET_PAIR_HANDS_LOST=$(getPocketPairStatFromDB "$CARD$CARD" "lost")
   POCKET_PAIR_HANDS_TOTAL=$(($POCKET_PAIR_HANDS_WON+$POCKET_PAIR_HANDS_LOST))
   POCKET_PAIR_HANDS_WON_PCT=$(bc <<< "scale=4; x = $POCKET_PAIR_HANDS_WON/$POCKET_PAIR_HANDS_TOTAL * 100; scale = 2; x / 1")
   POCKET_PAIR_HANDS_WON_SHOWDOWN_PCT=$(bc <<< "scale=4; x = $POCKET_PAIR_HANDS_WON_SHOWDOWN/$POCKET_PAIR_HANDS_TOTAL * 100; scale = 2; x / 1")
@@ -527,7 +468,7 @@ do
   # append another <td>
   POCKET_PAIR_TR="
                       <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-medium-column\">$HAND$HAND</td>
+                        <td class=\"cell100 stats-medium-column\">$CARD$CARD</td>
                         <td class=\"cell100 stats-medium-column\">$POCKET_PAIR ($POCKET_PAIR_PCT%) 1-in-$POCKET_PAIR_ONE_IN</td>
                         <td class=\"cell100 stats-medium-column\">$POCKET_PAIR_HANDS_WON ($POCKET_PAIR_HANDS_WON_PCT%)</td>
                         <td class=\"cell100 stats-medium-column\">$POCKET_PAIR_HANDS_WON_SHOWDOWN ($POCKET_PAIR_HANDS_WON_SHOWDOWN_PCT%)</td>
@@ -535,6 +476,7 @@ do
   "
   SITE_POCKET_PAIRS_BODY="$SITE_POCKET_PAIRS_BODY $POCKET_PAIR_TR"
 done
+echo ""
 
 # update site-wide stats
 STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_SITE_STATS_BODY_/$SITE_STATS_TEMPLATE}"
@@ -558,18 +500,5 @@ STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_SITE_POCKET_PAIRS_BODY_/$SITE_POCKET_
 # add generation date
 STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_GENERATED_ON_/$DATE}"
 
-# add poker site name
-STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_POKER_SITE_NAME_/$POKER_SITE_NAME}"
-
 # print it to the file
 echo "$STATS_HTML_CONTENT" > web/stats.html
-
-# cleanup time
-echo ""
-echo "=========   FINALIZING   ========="
-echo "Cleaning up the following temporary directories:"
-if [ -d "$TOURNMANENT_TEMP_DIR" ]; then echo "  -> $TOURNMANENT_TEMP_DIR"; rm -R $TOURNMANENT_TEMP_DIR; fi
-if [ -d "$CASH_TEMP_DIR" ]; then echo "  -> $CASH_TEMP_DIR"; rm -R $CASH_TEMP_DIR; fi
-if [ -d "$HOLDEM_TEMP_DIR" ]; then echo "  -> $HOLDEM_TEMP_DIR"; rm -R $HOLDEM_TEMP_DIR; fi
-if [ -d "$OMAHA_TEMP_DIR" ]; then echo "  -> $OMAHA_TEMP_DIR"; rm -R $OMAHA_TEMP_DIR; fi
-echo ""

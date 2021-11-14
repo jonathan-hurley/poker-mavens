@@ -30,7 +30,7 @@ then
 fi
 
 # ensure that command we use are available on the path
-requiredCommands=( grep egrep bc sed tidy )
+requiredCommands=( grep egrep bc sed tidy sqlite3 )
 for requiredCommandName in "${requiredCommands[@]}"
 do
   command -v $requiredCommandName &> /dev/null
@@ -45,6 +45,23 @@ done
 PM_DATA_TOURNEY_DIR="$POKER_MAVENS_HOME_DIR/TourneyResults"
 PM_DATA_HAND_HISTORY_DIR="$POKER_MAVENS_HOME_DIR/HandHistory"
 PM_DATA_LOGS_DIR="$POKER_MAVENS_HOME_DIR/Logs"
+
+# define temp directories for easier grep'ing later
+export ALL_HANDS_SYNC_TEMP_DIR="${ALL_HANDS_SYNC_TEMP_DIR:-`mktemp -d`}"
+export TOURNMANENT_TEMP_DIR="${TOURNMANENT_TEMP_DIR:-`mktemp -d`}"
+export CASH_TEMP_DIR="${CASH_TEMP_DIR:-`mktemp -d`}"
+export HOLDEM_TEMP_DIR="${HOLDEM_TEMP_DIR:-`mktemp -d`}"
+export OMAHA_TEMP_DIR="${OMAHA_TEMP_DIR:-`mktemp -d`}"
+export LOG_TEMP_DIR="${LOG_TEMP_DIR:-`mktemp -d`}"
+
+# define grep file patterns against temp directories
+export GREP_FILE_PATTERN_TOURNAMENT="$TOURNMANENT_TEMP_DIR/*"
+export GREP_FILE_PATTERN_CASH="$CASH_TEMP_DIR/*"
+export GREP_FILE_PATTERN_HOLDEM="$HOLDEM_TEMP_DIR/*"
+export GREP_FILE_PATTERN_OMAHA="$OMAHA_TEMP_DIR/*"
+export GREP_FILE_PATTERN_LOG="$LOG_TEMP_DIR/*"
+export GREP_FILE_PATTERN_ALL="$ALL_HANDS_SYNC_TEMP_DIR/*"
+export GREP_FILE_PATTERN_TOURNAMENT_RESULTS="$PM_DATA_TOURNEY_DIR/*"
 
 # calculate how much money a player has spent on buy-ins
 function calculatePlayerBuyInTotal(){
