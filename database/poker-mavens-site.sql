@@ -1,5 +1,5 @@
 CREATE TABLE site (
-	name TEXT(32) NOT NULL,
+  name TEXT(32) NOT NULL,
   last_scan TEXT(32) DEFAULT '01/01/1970 00:00:00' NOT NULL,
   total_hands INTEGER DEFAULT 0 NOT NULL,
   total_hands_holdem INTEGER DEFAULT 0 NOT NULL,
@@ -24,18 +24,18 @@ CREATE TABLE site (
   hand_ends_turn_cash INTEGER DEFAULT 0 NOT NULL,
   hand_ends_river_cash INTEGER DEFAULT 0 NOT NULL,
   hand_ends_showdown_cash INTEGER DEFAULT 0 NOT NULL,
-	CONSTRAINT site_PK PRIMARY KEY (name)
+  CONSTRAINT site_PK PRIMARY KEY (name)
 );
 
 INSERT INTO site (name) VALUES ('poker-mavens-site');
 
 CREATE TABLE pocket_pairs (
-	pair TEXT(32) NOT NULL,
+  pair TEXT(32) NOT NULL,
   total INTEGER DEFAULT 0 NOT NULL,
   total_won INTEGER DEFAULT 0 NOT NULL,
   total_won_at_showdown INTEGER DEFAULT 0 NOT NULL,
   lost INTEGER DEFAULT 0 NOT NULL,
-	CONSTRAINT pocket_pairs_PK PRIMARY KEY (pair)
+  CONSTRAINT pocket_pairs_PK PRIMARY KEY (pair)
 );
 
 INSERT INTO pocket_pairs (pair) VALUES ('22');
@@ -53,7 +53,7 @@ INSERT INTO pocket_pairs (pair) VALUES ('KK');
 INSERT INTO pocket_pairs (pair) VALUES ('AA');
 
 CREATE TABLE game_hands (
-	name TEXT(32) NOT NULL,
+  name TEXT(32) NOT NULL,
   royal_flush INTEGER DEFAULT 0 NOT NULL,
   straight_flush INTEGER DEFAULT 0 NOT NULL,
   four_of_a_kind INTEGER DEFAULT 0 NOT NULL,
@@ -64,19 +64,19 @@ CREATE TABLE game_hands (
   two_pair INTEGER DEFAULT 0 NOT NULL,
   pair INTEGER DEFAULT 0 NOT NULL,
   high_card INTEGER DEFAULT 0 NOT NULL,
-	CONSTRAINT game_hands_PK PRIMARY KEY (name)
+  CONSTRAINT game_hands_PK PRIMARY KEY (name)
 );
 
 INSERT INTO game_hands (name) VALUES ('holdem');
 INSERT INTO game_hands (name) VALUES ('omaha');
 
 CREATE TABLE players (
-	name TEXT(32) NOT NULL,
-	CONSTRAINT players_PK PRIMARY KEY (name)
+  name TEXT(32) NOT NULL,
+  CONSTRAINT players_PK PRIMARY KEY (name)
 );
 
 CREATE TABLE player_summary (
-	name TEXT(32) NOT NULL, 
+  name TEXT(32) NOT NULL, 
   total_hands_dealt INTEGER DEFAULT 0 NOT NULL,
   folded_hands_tournament INTEGER DEFAULT 0 NOT NULL,
   shown_hands_tournament INTEGER DEFAULT 0 NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE player_summary (
   hands_played_cash INTEGER DEFAULT 0 NOT NULL,
   largest_pot_won_cash REAL DEFAULT 0 NOT NULL,
   CONSTRAINT name_UN UNIQUE (name)
-	CONSTRAINT player_summary_FK FOREIGN KEY (name) REFERENCES players(name)
+  CONSTRAINT player_summary_FK FOREIGN KEY (name) REFERENCES players(name)
 );
 
 CREATE TABLE player_hands (
