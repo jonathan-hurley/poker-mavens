@@ -94,6 +94,9 @@ CREATE TABLE player_summary (
   all_ins_cash INTEGER DEFAULT 0 NOT NULL,
   hands_played_cash INTEGER DEFAULT 0 NOT NULL,
   largest_pot_won_cash REAL DEFAULT 0 NOT NULL,
+  tournament_gross_winnings REAL DEFAULT 0 NOT NULL,
+  tournament_total_spent REAL DEFAULT 0 NOT NULL,
+  cash_winnings REAL DEFAULT 0 NOT NULL,
   CONSTRAINT name_UN UNIQUE (name)
   CONSTRAINT player_summary_FK FOREIGN KEY (name) REFERENCES players(name)
 );
