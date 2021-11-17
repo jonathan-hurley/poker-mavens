@@ -81,7 +81,13 @@ for i in "${!PLAYERS[@]}"; do
     ROW_ALL_TDS="<td class=\"playerpocketpair-cell\">$FIRST_CARD</td>"    
     for SECOND_CARD in "${HANDS[@]}"
     do
+      # start out adding AK to KA to get the total "AK" hands
+      # but if both cards are equal, do incorrectly double the PP
       PLAYER_HOLE_CARD_COUNT_SQL="SELECT cards_$FIRST_CARD$SECOND_CARD + cards_$SECOND_CARD$FIRST_CARD FROM player_hands WHERE name = '$PLAYER'"
+      if [[ "$FIRST_CARD" == "$SECOND_CARD" ]]; then
+        PLAYER_HOLE_CARD_COUNT_SQL="SELECT cards_$FIRST_CARD$SECOND_CARD FROM player_hands WHERE name = '$PLAYER'"
+      fi
+
       PLAYER_HOLE_CARD_COUNT=`executeSQL "$PLAYER_HOLE_CARD_COUNT_SQL"`
       
       PLAYER_HOLE_CARD_COUNT_PCT=$(bc <<< "scale=4; x = $PLAYER_HOLE_CARD_COUNT / $PLAYER_TOTAL_HANDS_DEALT * 100; scale = 2; x / 1")
