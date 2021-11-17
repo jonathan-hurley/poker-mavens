@@ -91,6 +91,7 @@ for i in "${!PLAYERS[@]}"; do
       PLAYER_HOLE_CARD_COUNT=`executeSQL "$PLAYER_HOLE_CARD_COUNT_SQL"`
       
       PLAYER_HOLE_CARD_COUNT_PCT=$(bc <<< "scale=4; x = $PLAYER_HOLE_CARD_COUNT / $PLAYER_TOTAL_HANDS_DEALT * 100; scale = 2; x / 1")
+      PLAYER_HOLE_CARD_COUNT_PCT=$(printf "%.2f" $PLAYER_HOLE_CARD_COUNT_PCT)
       ROW_ALL_TDS="$ROW_ALL_TDS <td class=\"playerstats-cell\">$PLAYER_HOLE_CARD_COUNT<br/>($PLAYER_HOLE_CARD_COUNT_PCT%)</td>"
 
     # see if this is the most common hand so far
