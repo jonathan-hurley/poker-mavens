@@ -70,8 +70,8 @@ for i in "${!PLAYERS[@]}"; do
   PLAYER_ALL_TRS=""
 
   # fetch total of all hands dealt for this player
-  PLAYER_TOTAL_HANDS_DEALT_SQL=$(getPlayerStatFromDB "$PLAYER" "total_hands_dealt")
-  if [[ $TOTAL_PLAYER_HANDS_HOLDEM -eq 0 ]]; then
+  PLAYER_TOTAL_HANDS_DEALT=$(getPlayerStatFromDB "$PLAYER" "total_hands_dealt")
+  if [[ $PLAYER_TOTAL_HANDS_DEALT -eq 0 ]]; then
     continue
   fi
   
