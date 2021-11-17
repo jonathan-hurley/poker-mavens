@@ -81,7 +81,7 @@ for i in "${!PLAYERS[@]}"; do
     ROW_ALL_TDS="<td class=\"playerpocketpair-cell\">$FIRST_CARD</td>"    
     for SECOND_CARD in "${HANDS[@]}"
     do
-      PLAYER_HOLE_CARD_COUNT_SQL="SELECT cards_$FIRST_CARD$SECOND_CARD FROM player_hands WHERE name = '$PLAYER'"
+      PLAYER_HOLE_CARD_COUNT_SQL="SELECT cards_$FIRST_CARD$SECOND_CARD + cards_$SECOND_CARD$FIRST_CARD FROM player_hands WHERE name = '$PLAYER'"
       PLAYER_HOLE_CARD_COUNT=`executeSQL "$PLAYER_HOLE_CARD_COUNT_SQL"`
       
       PLAYER_HOLE_CARD_COUNT_PCT=$(bc <<< "scale=4; x = $PLAYER_HOLE_CARD_COUNT / $PLAYER_TOTAL_HANDS_DEALT * 100; scale = 2; x / 1")

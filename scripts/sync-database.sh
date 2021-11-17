@@ -199,8 +199,6 @@ for i in "${!PLAYERS[@]}"; do
     for SECOND_CARD in "${HANDS[@]}"
     do
       PLAYER_HOLE_CARD_COUNT=`egrep -oh "$PLAYER \(.*\) (\[$FIRST_CARD\w $SECOND_CARD\w\])" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
-      PLAYER_HOLE_CARD_COUNT_PCT=$(bc <<< "scale=4; x = $PLAYER_HOLE_CARD_COUNT / $PLAYER_TOTAL_HANDS_DEALT * 100; scale = 2; x / 1")
-
       UPDATE_PLAYER_SPECIFIC_HAND_SQL="UPDATE player_hands SET cards_$FIRST_CARD$SECOND_CARD = cards_$FIRST_CARD$SECOND_CARD + $PLAYER_HOLE_CARD_COUNT WHERE name = '$PLAYER'"
       executeSQL "$UPDATE_PLAYER_SPECIFIC_HAND_SQL"
     done
