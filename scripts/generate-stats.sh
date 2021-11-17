@@ -90,7 +90,7 @@ echo "=========  PLAYER STATISTICS  ========="
 for PLAYER in "${PLAYERS[@]}"
 do
   NOW="$(date +'%I:%M:%S')"
-  echo "[$NOW] → Rendering all hands for $PLAYER ..."
+  echo "[$NOW] → Rendering all stats for $PLAYER ..."
   
   # read all player stats from the DB
   # if this player has no cards, don't do anything
@@ -122,8 +122,15 @@ do
   PPP_ROW_TEMPLATE="<tr class=\"row100 body\"><td class=\"playerpocketpair-cell\">$PLAYER</td>"
 
   # calculate tournament winnings
-  PLAYER_TOURNAMENT_WINNINGS=$(calculatePlayerTournamentWinnings "$PLAYER")
-  PLAYER_TOURNAMENT_CASHES=$(calculatePlayerNumberOfCashes $PLAYER)
+  PLAYER_TOURNAMENT_WINNINGS=$(getPlayerStatFromDB "$PLAYER" "tournament_gross_winnings")
+  OFFSET=$(getPlayerStatFromDB "$PLAYER" "offset_tournament_winnings")
+  PLAYER_TOURNAMENT_WINNINGS=`bc <<< "$OFFSET + $PLAYER_TOURNAMENT_WINNINGS"`  
+
+  # get number of tournament cashes
+  PLAYER_TOURNAMENT_CASHES=$(getPlayerStatFromDB "$PLAYER" "tournament_cashes")
+  OFFSET=$(getPlayerStatFromDB "$PLAYER" "offset_tournament_num_cashes")
+  PLAYER_TOURNAMENT_CASHES=`bc <<< "$OFFSET + $PLAYER_TOURNAMENT_CASHES"`
+
   if [[ -z $PLAYER_TOURNAMENT_WINNINGS ]]; then
     PLAYER_TOURNAMENT_WINNINGS=0
     PLAYER_TOURNAMENT_CASHES=0
@@ -169,8 +176,8 @@ do
     continue
   fi
 
-  # calculate player cash total
-  PLAYER_CASH_TOTAL=$(calculatePlayerCashTotal "$PLAYER")
+  # get player cash total from DB
+  PLAYER_CASH_TOTAL=$(getPlayerCashTotalFromDB "$PLAYER")
 
   # calculate odds and finish position
   PLAYER_WINNING_ODDS_PCT=0

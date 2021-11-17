@@ -8,4 +8,5 @@ if [ -d "$CASH_TEMP_DIR" ]; then echo "  → $CASH_TEMP_DIR"; rm -Rf $CASH_TEMP_
 if [ -d "$HOLDEM_TEMP_DIR" ]; then echo "  → $HOLDEM_TEMP_DIR"; rm -R $HOLDEM_TEMP_DIR; fi
 if [ -d "$OMAHA_TEMP_DIR" ]; then echo "  → $OMAHA_TEMP_DIR"; rm -R $OMAHA_TEMP_DIR; fi
 if [ -d "$LOG_TEMP_DIR" ]; then echo "  → $LOG_TEMP_DIR"; rm -R $LOG_TEMP_DIR; fi
+if [ -d "$TOURNEY_RESULTS_TEMP_DIR" ]; then echo "  → $TOURNEY_RESULTS_TEMP_DIR"; rm -R $TOURNEY_RESULTS_TEMP_DIR; fi
 echo ""

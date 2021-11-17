@@ -128,8 +128,8 @@ do
 done
 echo ""
 
-# generate player data (hole card counts, tournament/cash stats, etc)
-for i in "${!PLAYERS[@]}"; do 
+# generate player data (hole card counts, tournament/cash stats, etc) and winnings
+for i in "${!PLAYERS[@]}"; do
   PLAYER="${PLAYERS[$i]}"
   NOW="$(date +'%I:%M:%S')"
   echo "[$NOW] → Processing all cards and stats for $PLAYER ..."
@@ -164,7 +164,7 @@ for i in "${!PLAYERS[@]}"; do
   PLAYER_HANDS_PLAYED_TOURNAMENT=`python scripts/hands-played.py --player $PLAYER --pattern "$GREP_FILE_PATTERN_TOURNAMENT"`
   PLAYER_HANDS_PLAYED_TOURNAMENT=$(incrementPlayerStatInDB "$PLAYER" "hands_played_tournament" $PLAYER_HANDS_PLAYED_TOURNAMENT)
   PLAYER_NUMBER_OF_TOURNAMENTS=`egrep -he "=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | wc -l | sed -e 's/^[[:space:]]*//'`
-  PLAYER_NUMBER_OF_TOURNAMENTS=$(setPlayerStatInDB "$PLAYER" "tournaments_entered" $PLAYER_NUMBER_OF_TOURNAMENTS)
+  PLAYER_NUMBER_OF_TOURNAMENTS=$(incrementPlayerStatInDB "$PLAYER" "tournaments_entered" $PLAYER_NUMBER_OF_TOURNAMENTS)
 
   # player cash stats
   PLAYER_FOLDED_HANDS_CASH=`egrep -he "$PLAYER folds" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
@@ -197,7 +197,7 @@ for i in "${!PLAYERS[@]}"; do
   for FIRST_CARD in "${HANDS[@]}"
   do
     for SECOND_CARD in "${HANDS[@]}"
-    do      
+    do
       PLAYER_HOLE_CARD_COUNT=`egrep -oh "$PLAYER \(.*\) (\[$FIRST_CARD\w $SECOND_CARD\w\])" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
       PLAYER_HOLE_CARD_COUNT_PCT=$(bc <<< "scale=4; x = $PLAYER_HOLE_CARD_COUNT / $PLAYER_TOTAL_HANDS_DEALT * 100; scale = 2; x / 1")
 
@@ -205,6 +205,25 @@ for i in "${!PLAYERS[@]}"; do
       executeSQL "$UPDATE_PLAYER_SPECIFIC_HAND_SQL"
     done
   done
+done
+
+for i in "${!PLAYERS[@]}"; do
+  PLAYER="${PLAYERS[$i]}"
+  NOW="$(date +'%I:%M:%S')"
+  echo "[$NOW] → Updating tournament and cash results for $PLAYER ..."
+
+  # update player tournament cashes
+  updatePlayerNumberOfCashes "$PLAYER"
+
+  # update player buy-ins
+  updatePlayerBuyInTotal "$PLAYER"
+
+  # update player tournament gross winnings
+  updatePlayerTournamentWinnings "$PLAYER"
+
+  # update player cash total
+  updatePlayerCashTotal "$PLAYER"
+  echo ""
 done
 
 # finally, update the last sync time

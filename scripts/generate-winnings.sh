@@ -1,25 +1,22 @@
 #!/usr/bin/env bash
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-. "$DIR/common.sh"
+. "$DIR/common-db.sh"
 
 DATE=`date "+Generated on %B %d, %Y"`
 
 # generate for cash
 CASH_TABLE_BODY=""
-echo -e "\n========= CASH SUMMARY ========="
+echo "========= CASH SUMMARY ========="
 for PLAYER in "${PLAYERS[@]}"
 do
-  # calculate player cash total
-  PLAYER_CASH_TOTAL=$(calculatePlayerCashTotal "$PLAYER")
+  # get player cash total from DB
+  PLAYER_CASH_TOTAL=$(getPlayerCashTotalFromDB "$PLAYER")
 
   if [[ $PLAYER_CASH_TOTAL == 0 ]]; then
     echo "$PLAYER: \$0.00"
     continue
   fi
-
-  # format the total
-  PLAYER_CASH_TOTAL=$(printf "%0.2f" $PLAYER_CASH_TOTAL)
 
   echo "$PLAYER: \$$PLAYER_CASH_TOTAL"
 
@@ -41,11 +38,17 @@ TOURNAMENT_TABLE_BODY=
 for PLAYER in "${PLAYERS[@]}"
 do
   # first calculate buy-ins spent
-  BUY_IN_TOTAL=$(calculatePlayerBuyInTotal "$PLAYER")
+  BUY_IN_TOTAL=$(getPlayerStatFromDB "$PLAYER" "tournament_total_spent")
 
   # calculate tournament winnings
-  PLAYER_TOURNAMENT_WINNINGS=$(calculatePlayerTournamentWinnings "$PLAYER")
-  PLAYER_TOURNAMENT_CASHES=$(calculatePlayerNumberOfCashes $PLAYER)
+  PLAYER_TOURNAMENT_WINNINGS=$(getPlayerStatFromDB "$PLAYER" "tournament_gross_winnings")
+  OFFSET=$(getPlayerStatFromDB "$PLAYER" "offset_tournament_winnings")
+  PLAYER_TOURNAMENT_WINNINGS=`bc <<< "$OFFSET + $PLAYER_TOURNAMENT_WINNINGS"`  
+
+  PLAYER_TOURNAMENT_CASHES=$(getPlayerStatFromDB "$PLAYER" "tournament_cashes")
+  OFFSET=$(getPlayerStatFromDB "$PLAYER" "offset_tournament_num_cashes")
+  PLAYER_TOURNAMENT_CASHES=`bc <<< "$OFFSET + $PLAYER_TOURNAMENT_CASHES"`  
+
   if [[ -z $PLAYER_TOURNAMENT_WINNINGS ]]; then
     PLAYER_TOURNAMENT_WINNINGS=0
   fi

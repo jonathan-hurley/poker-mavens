@@ -165,6 +165,24 @@ function ensurePlayersInTables(){
     insertPlayerIfNotExists "$PLAYER" players
     insertPlayerIfNotExists "$PLAYER" player_summary
     insertPlayerIfNotExists "$PLAYER" player_hands
+
+    # cash offset
+    if [ ${PLAYER_CASH_OFFSET[$PLAYER]+_} ]; then
+      OFFSET=${PLAYER_CASH_OFFSET[$PLAYER]}
+      setPlayerStatInDB "$PLAYER" "offset_cash_winnings" $OFFSET
+    fi
+
+    # tournament offset
+    if [ ${PLAYER_TOURNAMENT_WINNINGS_OFFSET[$PLAYER]+_} ]; then
+      OFFSET=${PLAYER_TOURNAMENT_WINNINGS_OFFSET[$PLAYER]}
+      setPlayerStatInDB "$PLAYER" "offset_tournament_winnings" $OFFSET
+    fi
+
+    # tournament cashes offset
+    if [ ${PLAYER_NUM_CASHES_OFFSET[$PLAYER]+_} ]; then
+      OFFSET=${PLAYER_NUM_CASHES_OFFSET[$PLAYER]}
+      setPlayerStatInDB "$PLAYER" "offset_tournament_num_cashes" $OFFSET
+    fi
   done
 
   echo ""
@@ -180,6 +198,7 @@ function copyFilesSinceLastSync() {
   echo "  Hold 'Em   → $HOLDEM_TEMP_DIR"
   echo "  Omaha      → $OMAHA_TEMP_DIR"
   echo "  Logs       → $LOG_TEMP_DIR"
+  echo "  Tournament Results → $TOURNEY_RESULTS_TEMP_DIR"
   echo 
 
   LAST_SYNC_DATE=$(getSitePropertyFromDB "last_scan")
@@ -187,11 +206,18 @@ function copyFilesSinceLastSync() {
   find $PM_DATA_HAND_HISTORY_DIR -maxdepth 1 -type f -newermt "$LAST_SYNC_DATE" -exec cp "{}" $ALL_HANDS_SYNC_TEMP_DIR  \;
   FILE_COUNT=$(ls -l $ALL_HANDS_SYNC_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
   echo "→ $FILE_COUNT new hand history files since $LAST_SYNC_DATE"
+  echo ""
 
   echo "→ Copying log files since $LAST_SYNC_DATE from $PM_DATA_HAND_HISTORY_DIR to $LOG_TEMP_DIR..."
   find $PM_DATA_LOGS_DIR -maxdepth 1 -type f -newermt "$LAST_SYNC_DATE" -exec cp "{}" $LOG_TEMP_DIR  \;
   FILE_COUNT=$(ls -l $LOG_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
   echo "→ $FILE_COUNT new log files since $LAST_SYNC_DATE"
+  echo ""
+
+  echo "→ Copying tournament results since $LAST_SYNC_DATE from $PM_DATA_TOURNEY_DIR to $TOURNEY_RESULTS_TEMP_DIR..."
+  find $PM_DATA_TOURNEY_DIR -maxdepth 1 -type f -newermt "$LAST_SYNC_DATE" -exec cp "{}" $TOURNEY_RESULTS_TEMP_DIR  \;
+  FILE_COUNT=$(ls -l $TOURNEY_RESULTS_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
+  echo "→ $FILE_COUNT new tournament files since $LAST_SYNC_DATE"
   echo ""
 
   # touch a simple file in this directory just to ensure if there are no files above, our greps don't fail
@@ -201,12 +227,31 @@ function copyFilesSinceLastSync() {
   touch "$HOLDEM_TEMP_DIR/marker"
   touch "$OMAHA_TEMP_DIR/marker"
   touch "$LOG_TEMP_DIR/marker"
+  touch "$TOURNEY_RESULTS_TEMP_DIR/marker"
 
   # copy PM files out to directories for easier grep'ing
   grep -l "Starting tournament" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $TOURNMANENT_TEMP_DIR
   grep -L "Starting tournament" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $CASH_TEMP_DIR
   egrep -l -m 1 "Game: (.*?)Hold'em" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $HOLDEM_TEMP_DIR
   egrep -l -m 1 "Game: (.*?)Omaha" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $OMAHA_TEMP_DIR  
+}
+
+# gets the player cash total, including the offset, from the database
+# will print (redacted) for any players in the redacted array
+function getPlayerCashTotalFromDB() {
+  PLAYER=$1
+
+  # if the player's cash must be redacted due to embarassement, then redact it
+  if printf '%s\n' "${PLAYERS_CASH_REDACTED[@]}" | grep -q -P "^$PLAYER\$"; then
+      echo "(redacted)"
+      return
+  fi
+
+  # calculate player cash total
+  PLAYER_CASH_TOTAL=$(getPlayerStatFromDB "$PLAYER" "cash_winnings")
+  OFFSET=$(getPlayerStatFromDB "$PLAYER" "offset_cash_winnings")
+  PLAYER_CASH_TOTAL=`bc <<< "$OFFSET + $PLAYER_CASH_TOTAL"`
+  echo "$PLAYER_CASH_TOTAL"
 }
 
 # updates the last sync to now
@@ -217,3 +262,78 @@ function updateLastSync() {
   setSitePropertyInDB "last_scan" "$NOW"
 }
 
+# updates the amount of money a player has spent on buy-ins and rebuys for all tournaments entered
+function updatePlayerBuyInTotal(){
+  PLAYER=$1
+
+  TOTAL=0
+  GROSS_TOTAL=0
+  
+  TOURNAMENT_FILES=$(egrep -l "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS)
+
+  # if there are no tournament files then bail
+  if [[ -z $TOURNAMENT_FILES ]]; then
+    echo "           Tournament buy-ins increased \$$TOTAL since last sync (Total: \$$GROSS_TOTAL)"  
+    return
+  fi  
+
+  while read -r TOURNAMENT_FILE; do
+    BUY_IN=`egrep -h "BuyIn" "$TOURNAMENT_FILE" | egrep -oe "[0-9|.]+\+[0-9]+" | awk '{s+=$1} END {print s}' | bc`
+    if [[ -z $BUY_IN ]]; then
+      BUY_IN=0
+    fi
+
+    REBUYS=`egrep -h "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | egrep -oe "Rebuys:[0-9]+" | tr -d 'Rebuys:'`
+    if [[ -z $REBUYS ]]; then
+      REBUYS=0
+    fi
+
+    TOTAL=$(bc <<< "$TOTAL + $BUY_IN + ($REBUYS * $BUY_IN)")
+  done <<< "$TOURNAMENT_FILES"
+
+  GROSS_TOTAL=$(incrementPlayerStatInDB "$PLAYER" "tournament_total_spent" $TOTAL)
+  echo "           Tournament buy-ins increased \$$TOTAL since last sync (Total: \$$GROSS_TOTAL)"
+}
+
+# uses tourney history to get player cashes
+# also handles bounties of the form ($0+$0)
+function updatePlayerNumberOfCashes(){
+  PLAYER=$1
+  NUMBER_OF_CASHES=$(egrep -h "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | egrep -oe "\(.*\)" | egrep -v "\(0\)|\(0\+0\)" | tr -d '()' | wc -l | sed -e 's/^[[:space:]]*//')
+  if [[ -z $NUMBER_OF_CASHES ]]; then
+    NUMBER_OF_CASHES=0
+  fi
+
+  TOTAL_NUMBER_OF_CASHES=$(incrementPlayerStatInDB "$PLAYER" "tournament_cashes" $NUMBER_OF_CASHES)
+  echo "           Tournament # of Cashes increased by $NUMBER_OF_CASHES since last sync (Total: $TOTAL_NUMBER_OF_CASHES)"
+}
+
+# uses tourney history to get player winnings
+# also handles bounties of the form ($0+$0)
+function updatePlayerTournamentWinnings(){
+  PLAYER=$1
+  TOURNAMENT_WINNINGS=$(egrep -h "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | egrep -oe "\(.*\)" | tr -d '()' | bc | awk '{s+=$1}END{print s}')
+
+  if [[ -z $TOURNAMENT_WINNINGS ]]; then
+    TOURNAMENT_WINNINGS=0
+  fi
+
+  TOTAL_TOURNAMENT_WINNINGS=$(incrementPlayerStatInDB "$PLAYER" "tournament_gross_winnings" $TOURNAMENT_WINNINGS)
+  echo "           Tournament winnings increased by \$$TOURNAMENT_WINNINGS since last sync (Total: \$$TOTAL_TOURNAMENT_WINNINGS)"
+}
+
+# uses logs to get player cash total
+function updatePlayerCashTotal(){
+  PLAYER=$1
+
+  # uses the House|Ring keyword to find money given to the house/ring for a player. 
+  # The problem is that it's not for a player, it's for the house, so we need to mutiply by -1 to get the player's amount
+  # We used to use the search by game name (ie Sizzler) but can't do that anymore since we want other games to show up
+  PLAYER_CASH_CHANGE=`egrep -h "House\|Ring.*($PLAYER .*)" $GREP_FILE_PATTERN_LOG | egrep -oe "House\|Ring.*balance" | egrep -oe "[-|+][0-9]+(\.[0-9]+)?" | awk '{s+=$1*-1} END {print s}'`
+  if [[ -z $PLAYER_CASH_CHANGE ]]; then
+    PLAYER_CASH_CHANGE=0
+  fi
+
+  PLAYER_CASH_TOTAL=$(incrementPlayerStatInDB "$PLAYER" "cash_winnings" $PLAYER_CASH_CHANGE)
+  echo "           Cash game profit changed by \$$PLAYER_CASH_CHANGE since last sync (Total: \$$PLAYER_CASH_TOTAL)"
+}
