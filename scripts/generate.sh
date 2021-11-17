@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-
-# fail on any error
-set -e
-
 . scripts/sync-database.sh
 . scripts/generate-stats.sh
 . scripts/generate-winnings.sh
