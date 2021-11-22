@@ -326,14 +326,27 @@ function updatePlayerTournamentWinnings(){
 function updatePlayerCashTotal(){
   PLAYER=$1
 
+  # this function has to ensure that files which were partially processed and then were appended to have 
+  # already processed lines dropped (based on date via awk)
+  LAST_SYNC_DATE=$(getSitePropertyFromDB "last_scan")  
+
+  # we need to convert between date formats for awk, but BSD vs GNU date take different arguments
+  if date --version >/dev/null 2>&1 ; then
+      AWK_LAST_SYNC_DATE=$(date -d"$LAST_SYNC_DATE" +"%Y-%m-%d %T")
+  else
+      AWK_LAST_SYNC_DATE=$(date -j -f "%D %T" "$LAST_SYNC_DATE" +"%Y-%m-%d %T")
+  fi
+
   # uses the House|Ring keyword to find money given to the house/ring for a player. 
   # The problem is that it's not for a player, it's for the house, so we need to mutiply by -1 to get the player's amount
   # We used to use the search by game name (ie Sizzler) but can't do that anymore since we want other games to show up
-  PLAYER_CASH_CHANGE=`egrep -h "House\|Ring.*($PLAYER .*)" $GREP_FILE_PATTERN_LOG | egrep -oe "House\|Ring.*balance" | egrep -oe "[-|+][0-9]+(\.[0-9]+)?" | awk '{s+=$1*-1} END {print s}'`
+  # This file also works around the "incremental update" issue on a single file by piping results through awk to compare dates
+  # from the last time the sync ran
+  PLAYER_CASH_CHANGE=$(egrep -h "House\|Ring.*($PLAYER .*)" $GREP_FILE_PATTERN_LOG | awk "\$0 > \"$AWK_LAST_SYNC_DATE\"" | egrep -oe "House\|Ring.*balance" | egrep -oe "[-|+][0-9]+(\.[0-9]+)?" | awk '{s+=$1*-1} END {print s}')
   if [[ -z $PLAYER_CASH_CHANGE ]]; then
     PLAYER_CASH_CHANGE=0
   fi
 
   PLAYER_CASH_TOTAL=$(incrementPlayerStatInDB "$PLAYER" "cash_winnings" $PLAYER_CASH_CHANGE)
-  echo "           Cash game profit changed by \$$PLAYER_CASH_CHANGE since last sync (Total: \$$PLAYER_CASH_TOTAL)"
+  echo "           Cash game profit changed by \$$PLAYER_CASH_CHANGE since $AWK_LAST_SYNC_DATE (Total: \$$PLAYER_CASH_TOTAL)"
 }
