@@ -188,7 +188,6 @@ function ensurePlayersInTables(){
   echo ""
 }
 
-# finds all of the files since the last sync and copies them to a temp location
 function copyFilesSinceLastSync() {
   echo "=========   PREPARING DIRECTORIES   ========="
   echo "Copying files from $PM_DATA_HAND_HISTORY_DIR to temp directories..."
@@ -201,14 +200,19 @@ function copyFilesSinceLastSync() {
   echo "  Tournament Results → $TOURNEY_RESULTS_TEMP_DIR"
   echo 
 
+  # build the date format that the mavens hand history use (1970-01-01)
+  # we cannot copy today's hand history file for processing since it gets appended to during the day
+  # and it would end up being double-processed the next time this is run (-not -name "HH$TODAY*")
+  TODAY=$(date +"%Y-%m-%d")
+
   LAST_SYNC_DATE=$(getSitePropertyFromDB "last_scan")
-  echo "→ Copying hand history files since $LAST_SYNC_DATE from $PM_DATA_HAND_HISTORY_DIR to $ALL_HANDS_SYNC_TEMP_DIR..."
-  find $PM_DATA_HAND_HISTORY_DIR -maxdepth 1 -type f -newermt "$LAST_SYNC_DATE" -exec cp "{}" $ALL_HANDS_SYNC_TEMP_DIR  \;
+  echo "→ Copying hand history files since $LAST_SYNC_DATE (excluding today, $TODAY) from $PM_DATA_HAND_HISTORY_DIR to $ALL_HANDS_SYNC_TEMP_DIR..."
+  find $PM_DATA_HAND_HISTORY_DIR -maxdepth 1 -type f -not -name "HH$TODAY*" -newermt "$LAST_SYNC_DATE" -exec cp "{}" $ALL_HANDS_SYNC_TEMP_DIR  \;
   FILE_COUNT=$(ls -l $ALL_HANDS_SYNC_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
   echo "→ $FILE_COUNT new hand history files since $LAST_SYNC_DATE"
   echo ""
 
-  echo "→ Copying log files since $LAST_SYNC_DATE from $PM_DATA_HAND_HISTORY_DIR to $LOG_TEMP_DIR..."
+  echo "→ Copying log files since $LAST_SYNC_DATE from $PM_DATA_LOGS_DIR to $LOG_TEMP_DIR..."
   find $PM_DATA_LOGS_DIR -maxdepth 1 -type f -newermt "$LAST_SYNC_DATE" -exec cp "{}" $LOG_TEMP_DIR  \;
   FILE_COUNT=$(ls -l $LOG_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
   echo "→ $FILE_COUNT new log files since $LAST_SYNC_DATE"
