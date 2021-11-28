@@ -206,8 +206,8 @@ function copyFilesSinceLastSync() {
   # and it would end up being double-processed the next time this is run (-not -name "HH$TODAY*")
   TODAY=$(date +"%Y-%m-%d")
 
-  echo "→ Copying Poker Mavens files since $LAST_SYNC_DATE excluding today ($TODAY) ..."
   LAST_SYNC_DATE=$(getSitePropertyFromDB "last_sync")
+  echo "→ Copying Poker Mavens files since $LAST_SYNC_DATE excluding today ($TODAY) ..."
   echo "→ Copying hand history files from $PM_DATA_HAND_HISTORY_DIR to $ALL_HANDS_SYNC_TEMP_DIR..."
   find $PM_DATA_HAND_HISTORY_DIR -maxdepth 1 -type f -not -name "HH$TODAY*" -newermt "$LAST_SYNC_DATE" -exec cp "{}" $ALL_HANDS_SYNC_TEMP_DIR  \;
   FILE_COUNT=$(ls -l $ALL_HANDS_SYNC_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
