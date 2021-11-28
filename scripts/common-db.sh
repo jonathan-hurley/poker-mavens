@@ -206,21 +206,22 @@ function copyFilesSinceLastSync() {
   # and it would end up being double-processed the next time this is run (-not -name "HH$TODAY*")
   TODAY=$(date +"%Y-%m-%d")
 
+  echo "→ Copying Poker Mavens files since $LAST_SYNC_DATE excluding today ($TODAY) ...
   LAST_SYNC_DATE=$(getSitePropertyFromDB "last_sync")
-  echo "→ Copying hand history files since $LAST_SYNC_DATE (excluding today, $TODAY) from $PM_DATA_HAND_HISTORY_DIR to $ALL_HANDS_SYNC_TEMP_DIR..."
+  echo "→ Copying hand history files from $PM_DATA_HAND_HISTORY_DIR to $ALL_HANDS_SYNC_TEMP_DIR..."
   find $PM_DATA_HAND_HISTORY_DIR -maxdepth 1 -type f -not -name "HH$TODAY*" -newermt "$LAST_SYNC_DATE" -exec cp "{}" $ALL_HANDS_SYNC_TEMP_DIR  \;
   FILE_COUNT=$(ls -l $ALL_HANDS_SYNC_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
   echo "→ $FILE_COUNT new hand history files since $LAST_SYNC_DATE"
   echo ""
 
-  echo "→ Copying log files since $LAST_SYNC_DATE from $PM_DATA_LOGS_DIR to $LOG_TEMP_DIR..."
-  find $PM_DATA_LOGS_DIR -maxdepth 1 -type f -newermt "$LAST_SYNC_DATE" -exec cp "{}" $LOG_TEMP_DIR  \;
+  echo "→ Copying log files from $PM_DATA_LOGS_DIR to $LOG_TEMP_DIR..."
+  find $PM_DATA_LOGS_DIR -maxdepth 1 -type f -not -name "EventLog$TODAY*" -newermt "$LAST_SYNC_DATE" -exec cp "{}" $LOG_TEMP_DIR  \;
   FILE_COUNT=$(ls -l $LOG_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
   echo "→ $FILE_COUNT new log files since $LAST_SYNC_DATE"
   echo ""
 
-  echo "→ Copying tournament results since $LAST_SYNC_DATE from $PM_DATA_TOURNEY_DIR to $TOURNEY_RESULTS_TEMP_DIR..."
-  find $PM_DATA_TOURNEY_DIR -maxdepth 1 -type f -newermt "$LAST_SYNC_DATE" -exec cp "{}" $TOURNEY_RESULTS_TEMP_DIR  \;
+  echo "→ Copying tournament results from $PM_DATA_TOURNEY_DIR to $TOURNEY_RESULTS_TEMP_DIR..."
+  find $PM_DATA_TOURNEY_DIR -maxdepth 1 -type f -not -name "TR$TODAY*" -newermt "$LAST_SYNC_DATE" -exec cp "{}" $TOURNEY_RESULTS_TEMP_DIR  \;
   FILE_COUNT=$(ls -l $TOURNEY_RESULTS_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
   echo "→ $FILE_COUNT new tournament files since $LAST_SYNC_DATE"
   echo ""
