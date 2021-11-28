@@ -1,6 +1,6 @@
 CREATE TABLE site (
   name TEXT(32) NOT NULL,
-  last_scan TEXT(32) DEFAULT '01/01/1970 00:00:00' NOT NULL,
+  last_sync TEXT(32) DEFAULT '1970-01-01 00:00:00' NOT NULL,
   total_hands INTEGER DEFAULT 0 NOT NULL,
   total_hands_holdem INTEGER DEFAULT 0 NOT NULL,
   total_hands_omaha INTEGER DEFAULT 0 NOT NULL,

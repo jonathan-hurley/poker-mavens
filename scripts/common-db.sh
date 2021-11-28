@@ -188,6 +188,7 @@ function ensurePlayersInTables(){
   echo ""
 }
 
+# finds all of the files since the last sync and copies them to a temp location
 function copyFilesSinceLastSync() {
   echo "=========   PREPARING DIRECTORIES   ========="
   echo "Copying files from $PM_DATA_HAND_HISTORY_DIR to temp directories..."
@@ -205,7 +206,7 @@ function copyFilesSinceLastSync() {
   # and it would end up being double-processed the next time this is run (-not -name "HH$TODAY*")
   TODAY=$(date +"%Y-%m-%d")
 
-  LAST_SYNC_DATE=$(getSitePropertyFromDB "last_scan")
+  LAST_SYNC_DATE=$(getSitePropertyFromDB "last_sync")
   echo "→ Copying hand history files since $LAST_SYNC_DATE (excluding today, $TODAY) from $PM_DATA_HAND_HISTORY_DIR to $ALL_HANDS_SYNC_TEMP_DIR..."
   find $PM_DATA_HAND_HISTORY_DIR -maxdepth 1 -type f -not -name "HH$TODAY*" -newermt "$LAST_SYNC_DATE" -exec cp "{}" $ALL_HANDS_SYNC_TEMP_DIR  \;
   FILE_COUNT=$(ls -l $ALL_HANDS_SYNC_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
@@ -258,12 +259,22 @@ function getPlayerCashTotalFromDB() {
   echo "$PLAYER_CASH_TOTAL"
 }
 
-# updates the last sync to now
+# updates the last sync to yesterday at 11:59:59
+# this is because poker mavens appends to "today's" files for logs and history
+# if a table starts at 1am and stops at 2am, and then again at 8pm, we need 
+# to exclude the file otherwise it will be double processed
 function updateLastSync() {
-  NOW=$(date +"%D %T")
-  echo "→ Updating last scan time to $NOW"
+  # we need to convert between date formats for awk, but BSD vs GNU date take different arguments
+  if date --version >/dev/null 2>&1 ; then
+      YESTERDAY=$(date -d "$date -1 days" +"%Y-%m-%d 23:59:59")
+  else
+      YESTERDAY=$(date -j -v -1d +"%Y-%m-%d 23:59:59")
+  fi
+
+  
+  echo "→ Updating last sync time to $YESTERDAY"
   echo ""
-  setSitePropertyInDB "last_scan" "$NOW"
+  setSitePropertyInDB "last_sync" "$YESTERDAY"
 }
 
 # updates the amount of money a player has spent on buy-ins and rebuys for all tournaments entered
@@ -332,25 +343,18 @@ function updatePlayerCashTotal(){
 
   # this function has to ensure that files which were partially processed and then were appended to have 
   # already processed lines dropped (based on date via awk)
-  LAST_SYNC_DATE=$(getSitePropertyFromDB "last_scan")  
-
-  # we need to convert between date formats for awk, but BSD vs GNU date take different arguments
-  if date --version >/dev/null 2>&1 ; then
-      AWK_LAST_SYNC_DATE=$(date -d"$LAST_SYNC_DATE" +"%Y-%m-%d %T")
-  else
-      AWK_LAST_SYNC_DATE=$(date -j -f "%D %T" "$LAST_SYNC_DATE" +"%Y-%m-%d %T")
-  fi
+  LAST_SYNC_DATE=$(getSitePropertyFromDB "last_sync")  
 
   # uses the House|Ring keyword to find money given to the house/ring for a player. 
   # The problem is that it's not for a player, it's for the house, so we need to mutiply by -1 to get the player's amount
   # We used to use the search by game name (ie Sizzler) but can't do that anymore since we want other games to show up
   # This file also works around the "incremental update" issue on a single file by piping results through awk to compare dates
   # from the last time the sync ran
-  PLAYER_CASH_CHANGE=$(egrep -h "House\|Ring.*($PLAYER .*)" $GREP_FILE_PATTERN_LOG | awk "\$0 > \"$AWK_LAST_SYNC_DATE\"" | egrep -oe "House\|Ring.*balance" | egrep -oe "[-|+][0-9]+(\.[0-9]+)?" | awk '{s+=$1*-1} END {print s}')
+  PLAYER_CASH_CHANGE=$(egrep -h "House\|Ring.*($PLAYER .*)" $GREP_FILE_PATTERN_LOG | awk "\$0 > \"$LAST_SYNC_DATE\"" | egrep -oe "House\|Ring.*balance" | egrep -oe "[-|+][0-9]+(\.[0-9]+)?" | awk '{s+=$1*-1} END {print s}')
   if [[ -z $PLAYER_CASH_CHANGE ]]; then
     PLAYER_CASH_CHANGE=0
   fi
 
   PLAYER_CASH_TOTAL=$(incrementPlayerStatInDB "$PLAYER" "cash_winnings" $PLAYER_CASH_CHANGE)
-  echo "           Cash game profit changed by \$$PLAYER_CASH_CHANGE since $AWK_LAST_SYNC_DATE (Total: \$$PLAYER_CASH_TOTAL)"
+  echo "           Cash game profit changed by \$$PLAYER_CASH_CHANGE since $LAST_SYNC_DATE (Total: \$$PLAYER_CASH_TOTAL)"
 }
