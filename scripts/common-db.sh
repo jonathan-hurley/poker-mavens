@@ -201,27 +201,43 @@ function copyFilesSinceLastSync() {
   echo "  Tournament Results → $TOURNEY_RESULTS_TEMP_DIR"
   echo 
 
-  # build the date format that the mavens hand history use (1970-01-01)
+  # build the date format that the mavens files use (1970-01-01)
   # we cannot copy today's hand history file for processing since it gets appended to during the day
   # and it would end up being double-processed the next time this is run (-not -name "HH$TODAY*")
   TODAY=$(date +"%Y-%m-%d")
-
+  NOW=$(date +"%Y-%m-%d %T")
+  LAST_SYNC_DATE_ONLY=$(getPokerMavensFormattedDateOfLastSync)
   LAST_SYNC_DATE=$(getSitePropertyFromDB "last_sync")
-  echo "→ Copying Poker Mavens files since $LAST_SYNC_DATE excluding today ($TODAY) ..."
+
+  echo "→ Copying Poker Mavens files with the following dates..."
+  echo "  Hand history: [$LAST_SYNC_DATE to $NOW] and [$LAST_SYNC_DATE_ONLY] but not [$TODAY]"
+  echo "  Tournament files: [$LAST_SYNC_DATE] to [$NOW]"
+  echo "  Log files: [$LAST_SYNC_DATE] to [$NOW]"
+  echo
+
+  # we simulate "up to yesterday" by dropping all HH files created today
   echo "→ Copying hand history files from $PM_DATA_HAND_HISTORY_DIR to $ALL_HANDS_SYNC_TEMP_DIR..."
   find $PM_DATA_HAND_HISTORY_DIR -maxdepth 1 -type f -not -name "HH$TODAY*" -newermt "$LAST_SYNC_DATE" -exec cp "{}" $ALL_HANDS_SYNC_TEMP_DIR  \;
   FILE_COUNT=$(ls -l $ALL_HANDS_SYNC_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
   echo "→ $FILE_COUNT new hand history files since $LAST_SYNC_DATE"
   echo ""
 
+  # copy hand history files skipped on the last sync date (those skipped above)
+  echo "→ Copying hand history files from $PM_DATA_HAND_HISTORY_DIR to $ALL_HANDS_SYNC_TEMP_DIR..."
+  find $PM_DATA_HAND_HISTORY_DIR -maxdepth 1 -type f -and -name "HH$LAST_SYNC_DATE_ONLY*" -and -not -name "HH$TODAY*" -exec cp "{}" $ALL_HANDS_SYNC_TEMP_DIR  \;
+  FILE_COUNT=$(ls -l $ALL_HANDS_SYNC_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
+  echo "→ $FILE_COUNT hand history files which were skipped on $LAST_SYNC_DATE_ONLY but did not match today ($TODAY)"
+  echo ""
+
+  # log files can be post-processed incrementally since each line has a timestamp, so get everything since the last sync
   echo "→ Copying log files from $PM_DATA_LOGS_DIR to $LOG_TEMP_DIR..."
-  find $PM_DATA_LOGS_DIR -maxdepth 1 -type f -not -name "EventLog$TODAY*" -newermt "$LAST_SYNC_DATE" -exec cp "{}" $LOG_TEMP_DIR  \;
+  find $PM_DATA_LOGS_DIR -maxdepth 1 -type f -newermt "$LAST_SYNC_DATE" -exec cp "{}" $LOG_TEMP_DIR  \;
   FILE_COUNT=$(ls -l $LOG_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
   echo "→ $FILE_COUNT new log files since $LAST_SYNC_DATE"
   echo ""
 
   echo "→ Copying tournament results from $PM_DATA_TOURNEY_DIR to $TOURNEY_RESULTS_TEMP_DIR..."
-  find $PM_DATA_TOURNEY_DIR -maxdepth 1 -type f -not -name "TR$TODAY*" -newermt "$LAST_SYNC_DATE" -exec cp "{}" $TOURNEY_RESULTS_TEMP_DIR  \;
+  find $PM_DATA_TOURNEY_DIR -maxdepth 1 -type f -newermt "$LAST_SYNC_DATE" -exec cp "{}" $TOURNEY_RESULTS_TEMP_DIR  \;
   FILE_COUNT=$(ls -l $TOURNEY_RESULTS_TEMP_DIR | wc -l | sed -e 's/^[[:space:]]*//')
   echo "→ $FILE_COUNT new tournament files since $LAST_SYNC_DATE"
   echo ""
@@ -260,22 +276,12 @@ function getPlayerCashTotalFromDB() {
   echo "$PLAYER_CASH_TOTAL"
 }
 
-# updates the last sync to yesterday at 11:59:59
-# this is because poker mavens appends to "today's" files for logs and history
-# if a table starts at 1am and stops at 2am, and then again at 8pm, we need 
-# to exclude the file otherwise it will be double processed
+# updates the last time the database sync ran
 function updateLastSync() {
-  # we need to convert between date formats for awk, but BSD vs GNU date take different arguments
-  if date --version >/dev/null 2>&1 ; then
-      YESTERDAY=$(date -d "$date -1 days" +"%Y-%m-%d 23:59:59")
-  else
-      YESTERDAY=$(date -j -v -1d +"%Y-%m-%d 23:59:59")
-  fi
-
-  
-  echo "→ Updating last sync time to $YESTERDAY"
+  TODAY=$(date +"%Y-%m-%d %T")
+  echo "→ Updating last sync time to $TODAY"
   echo ""
-  setSitePropertyInDB "last_sync" "$YESTERDAY"
+  setSitePropertyInDB "last_sync" "$TODAY"
 }
 
 # updates the amount of money a player has spent on buy-ins and rebuys for all tournaments entered
@@ -344,7 +350,7 @@ function updatePlayerCashTotal(){
 
   # this function has to ensure that files which were partially processed and then were appended to have 
   # already processed lines dropped (based on date via awk)
-  LAST_SYNC_DATE=$(getSitePropertyFromDB "last_sync")  
+  LAST_SYNC_DATE=$(getSitePropertyFromDB "last_sync")
 
   # uses the House|Ring keyword to find money given to the house/ring for a player. 
   # The problem is that it's not for a player, it's for the house, so we need to mutiply by -1 to get the player's amount
@@ -358,4 +364,47 @@ function updatePlayerCashTotal(){
 
   PLAYER_CASH_TOTAL=$(incrementPlayerStatInDB "$PLAYER" "cash_winnings" $PLAYER_CASH_CHANGE)
   echo "           Cash game profit changed by \$$PLAYER_CASH_CHANGE since $LAST_SYNC_DATE (Total: \$$PLAYER_CASH_TOTAL)"
+}
+
+# gets a date formatted string representing 11:59:59 PM on the day before the last sync
+function getDayBeforeLastSync() {
+  LAST_SYNC_DATE=$(getSitePropertyFromDB "last_sync")
+
+  # determine which version of date to use (BSD vs GNU)
+  if date --version >/dev/null 2>&1 ; then
+      # convert to ISO to prevent timezone from being taken into account
+      DAY_BEFORE_LAST_SYNC=$(date -d "$(date -Iseconds -d "$LAST_SYNC_DATE") - 1 days" +"%Y-%m-%d 23:59:59")
+  else
+      DAY_BEFORE_LAST_SYNC=$(date -j -v -1d -f "%Y-%m-%d %T" "$LAST_SYNC_DATE" +"%Y-%m-%d 23:59:59")
+  fi
+
+  echo "$DAY_BEFORE_LAST_SYNC"
+}
+
+# gets a date formatted string representing 00:00:00 on the day of the last sync
+function getStartOfDayOfLastSync() {
+  LAST_SYNC_DATE=$(getSitePropertyFromDB "last_sync")
+
+  # determine which version of date to use (BSD vs GNU)
+  if date --version >/dev/null 2>&1 ; then
+      DAY_BEFORE_LAST_SYNC=$(date -d "$LAST_SYNC_DATE" +"%Y-%m-%d 00:00:00")
+  else
+      DAY_BEFORE_LAST_SYNC=$(date -j -f "%Y-%m-%d %T" "$LAST_SYNC_DATE" +"%Y-%m-%d 00:00:00")
+  fi
+
+  echo "$DAY_BEFORE_LAST_SYNC"
+}
+
+# Gets a date, formatted to the PM file format, matching the last sync date
+function getPokerMavensFormattedDateOfLastSync() {
+  LAST_SYNC_DATE=$(getSitePropertyFromDB "last_sync")
+
+  # determine which version of date to use (BSD vs GNU)
+  if date --version >/dev/null 2>&1 ; then
+      LASY_SYNC_DATE_ONLY=$(date -d "$LAST_SYNC_DATE" +"%Y-%m-%d")
+  else
+      LASY_SYNC_DATE_ONLY=$(date -j -f "%Y-%m-%d %T" "$LAST_SYNC_DATE" +"%Y-%m-%d")
+  fi
+
+  echo "$LASY_SYNC_DATE_ONLY"
 }

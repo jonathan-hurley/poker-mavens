@@ -106,4 +106,14 @@ function calculatePlayerAverageTournmanentFinish(){
   echo $AVERAGE_FINISH_POSITION
 }
 
+# gets a date formatted string representing 11:59:59 PM yesterday
+function getYesterday() {
+  # we need to convert between date formats for awk, but BSD vs GNU date take different arguments
+  if date --version >/dev/null 2>&1 ; then
+      YESTERDAY=$(date -d "$date -1 days" +"%Y-%m-%d 23:59:59")
+  else
+      YESTERDAY=$(date -j -v -1d +"%Y-%m-%d 23:59:59")
+  fi
 
+  echo "$YESTERDAY"
+}
