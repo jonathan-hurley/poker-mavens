@@ -187,11 +187,17 @@ for i in "${!PLAYERS[@]}"; do
   PLAYER_HANDS_PLAYED_CASH=`python scripts/hands-played.py --player $PLAYER --pattern "$GREP_FILE_PATTERN_CASH"`
   PLAYER_HANDS_PLAYED_CASH=$(incrementPlayerStatInDB "$PLAYER" "hands_played_cash" $PLAYER_HANDS_PLAYED_CASH)
   
+  # compare the currently known largest pot won to the largest one from the sample set for this sync
+  CURRENT_BIGGEST_CASH_HAND=$(getPlayerStatFromDB "$PLAYER" "largest_pot_won_cash")
   PLAYER_BIGGEST_CASH_HAND=`egrep -ho "$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_CASH | egrep -o "\(.*\)" | egrep -o "[0-9,.]+" | sort -n | tail -n 1`
   if [[ -z $PLAYER_BIGGEST_CASH_HAND ]]; then
     PLAYER_BIGGEST_CASH_HAND=0
   fi
-  PLAYER_BIGGEST_CASH_HAND=$(incrementPlayerStatInDB "$PLAYER" "largest_pot_won_cash" $PLAYER_BIGGEST_CASH_HAND)  
+
+  # if the largest pot is the new record, then set it in the DB
+  if [[ $(echo "$PLAYER_BIGGEST_CASH_HAND > $CURRENT_BIGGEST_CASH_HAND" | bc -l) ]]; then
+    setPlayerStatInDB "$PLAYER" "largest_pot_won_cash" $PLAYER_BIGGEST_CASH_HAND
+  fi
 
   # process all hole cards dealt to the player
   for FIRST_CARD in "${HANDS[@]}"
