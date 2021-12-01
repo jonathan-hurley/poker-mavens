@@ -252,7 +252,7 @@ function copyFilesSinceLastSync() {
   touch "$TOURNEY_RESULTS_TEMP_DIR/marker"
 
   # copy PM files out to directories for easier grep'ing
-  grep -l "Starting tournament" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $TOURNMANENT_TEMP_DIR
+  grep -l "Starting tournament\|finishes tournament in place" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $TOURNMANENT_TEMP_DIR
   grep -L "Starting tournament\|finishes tournament in place" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $CASH_TEMP_DIR
   egrep -l -m 1 "Game: (.*?)Hold'em" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $HOLDEM_TEMP_DIR
   egrep -l -m 1 "Game: (.*?)Omaha" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $OMAHA_TEMP_DIR  
