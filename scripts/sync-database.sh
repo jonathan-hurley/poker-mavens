@@ -195,7 +195,7 @@ for i in "${!PLAYERS[@]}"; do
   fi
 
   # if the largest pot is the new record, then set it in the DB
-  if [[ $(echo "$PLAYER_BIGGEST_CASH_HAND > $CURRENT_BIGGEST_CASH_HAND" | bc -l) ]]; then
+  if (( $(echo "$PLAYER_BIGGEST_CASH_HAND > $CURRENT_BIGGEST_CASH_HAND" | bc -l) )); then
     setPlayerStatInDB "$PLAYER" "largest_pot_won_cash" $PLAYER_BIGGEST_CASH_HAND
   fi
 
