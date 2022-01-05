@@ -357,7 +357,7 @@ function updatePlayerCashTotal(){
   # We used to use the search by game name (ie Sizzler) but can't do that anymore since we want other games to show up
   # This file also works around the "incremental update" issue on a single file by piping results through awk to compare dates
   # from the last time the sync ran
-  PLAYER_CASH_CHANGE=$(egrep -h "House\|Ring.*($PLAYER .*)" $GREP_FILE_PATTERN_LOG | awk "\$0 > \"$LAST_SYNC_DATE\"" | egrep -oe "House\|Ring.*balance" | egrep -oe "[-|+][0-9]+(\.[0-9]+)?" | awk '{s+=$1*-1} END {print s}')
+  PLAYER_CASH_CHANGE=$(egrep -h "House\|Ring.*\($PLAYER .*\)" $GREP_FILE_PATTERN_LOG | awk "\$0 > \"$LAST_SYNC_DATE\"" | egrep -oe "House\|Ring.*balance" | egrep -oe "[-|+][0-9]+(\.[0-9]+)?" | awk '{s+=$1*-1} END {print s}')
   if [[ -z $PLAYER_CASH_CHANGE ]]; then
     PLAYER_CASH_CHANGE=0
   fi

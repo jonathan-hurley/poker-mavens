@@ -135,7 +135,7 @@ for i in "${!PLAYERS[@]}"; do
   echo "[$NOW] → Processing all cards and stats for $PLAYER ..."
 
   # count the total hands played and then update the database
-  PLAYER_TOTAL_HANDS_DEALT=`egrep -he "Seat.*$PLAYER \(.*\) \[.*\]" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
+  PLAYER_TOTAL_HANDS_DEALT=`egrep -he "Seat [0-9]+: $PLAYER \(.*\) \[.*\]" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
   PLAYER_TOTAL_HANDS_DEALT=$(incrementPlayerStatInDB "$PLAYER" "total_hands_dealt" $PLAYER_TOTAL_HANDS_DEALT)
 
   # if this player has no cards, don't do anything
@@ -144,22 +144,22 @@ for i in "${!PLAYERS[@]}"; do
   fi
 
   # player tournament stats
-  PLAYER_FOLDED_HANDS_TOURNAMENT=`egrep -he "$PLAYER folds" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
+  PLAYER_FOLDED_HANDS_TOURNAMENT=`egrep -he "^$PLAYER folds" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
   PLAYER_FOLDED_HANDS_TOURNAMENT=$(incrementPlayerStatInDB "$PLAYER" "folded_hands_tournament" $PLAYER_FOLDED_HANDS_TOURNAMENT)
-  PLAYER_SHOWN_HANDS_TOURNAMENT=`egrep -he "$PLAYER shows" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
+  PLAYER_SHOWN_HANDS_TOURNAMENT=`egrep -he "^$PLAYER shows" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
   PLAYER_SHOWN_HANDS_TOURNAMENT=$(incrementPlayerStatInDB "$PLAYER" "shown_hands_tournament" $PLAYER_SHOWN_HANDS_TOURNAMENT)
-  PLAYER_REFUNDED_HANDS_TOURNAMENT=`egrep -he "$PLAYER refunded" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
+  PLAYER_REFUNDED_HANDS_TOURNAMENT=`egrep -he "^$PLAYER refunded" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
   PLAYER_REFUNDED_HANDS_TOURNAMENT=$(incrementPlayerStatInDB "$PLAYER" "refunded_hands_tournament" $PLAYER_REFUNDED_HANDS_TOURNAMENT)
-  PLAYER_WON_HANDS_TOURNAMENT=`egrep -he "$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
+  PLAYER_WON_HANDS_TOURNAMENT=`egrep -he "^$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
   PLAYER_WON_HANDS_TOURNAMENT=$(incrementPlayerStatInDB "$PLAYER" "won_hands_tournament" $PLAYER_WON_HANDS_TOURNAMENT)
 
-  PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT=`egrep -he "$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_TOURNAMENT | egrep -o "\(.*\)" | egrep -oe '\([0-9]{2,}\.?.*\)' | tr -d '()' | awk '{s+=$1} END {print s}'`
+  PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT=`egrep -he "^$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_TOURNAMENT | egrep -o "\(.*\)" | egrep -oe '\([0-9]{2,}\.?.*\)' | tr -d '()' | awk '{s+=$1} END {print s}'`
   if [[ -z $PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT ]]; then
     PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT=0
   fi
   PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT=$(incrementPlayerStatInDB "$PLAYER" "total_won_pot_size_tournament" $PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT)
 
-  PLAYER_ALL_INS_TOURNAMENT=`egrep -he "$PLAYER .*(All-in)" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
+  PLAYER_ALL_INS_TOURNAMENT=`egrep -he "^$PLAYER .*\(All-in\)" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
   PLAYER_ALL_INS_TOURNAMENT=$(incrementPlayerStatInDB "$PLAYER" "all_ins_tournament" $PLAYER_ALL_INS_TOURNAMENT)
   PLAYER_HANDS_PLAYED_TOURNAMENT=`python scripts/hands-played.py --player $PLAYER --pattern "$GREP_FILE_PATTERN_TOURNAMENT"`
   PLAYER_HANDS_PLAYED_TOURNAMENT=$(incrementPlayerStatInDB "$PLAYER" "hands_played_tournament" $PLAYER_HANDS_PLAYED_TOURNAMENT)
@@ -167,29 +167,29 @@ for i in "${!PLAYERS[@]}"; do
   PLAYER_NUMBER_OF_TOURNAMENTS=$(incrementPlayerStatInDB "$PLAYER" "tournaments_entered" $PLAYER_NUMBER_OF_TOURNAMENTS)
 
   # player cash stats
-  PLAYER_FOLDED_HANDS_CASH=`egrep -he "$PLAYER folds" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
+  PLAYER_FOLDED_HANDS_CASH=`egrep -he "^$PLAYER folds" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
   PLAYER_FOLDED_HANDS_CASH=$(incrementPlayerStatInDB "$PLAYER" "folded_hands_cash" $PLAYER_FOLDED_HANDS_CASH)
-  PLAYER_SHOWN_HANDS_CASH=`egrep -he "$PLAYER shows" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
+  PLAYER_SHOWN_HANDS_CASH=`egrep -he "^$PLAYER shows" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
   PLAYER_SHOWN_HANDS_CASH=$(incrementPlayerStatInDB "$PLAYER" "shown_hands_cash" $PLAYER_SHOWN_HANDS_CASH)
-  PLAYER_REFUNDED_HANDS_CASH=`egrep -he "$PLAYER refunded" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
+  PLAYER_REFUNDED_HANDS_CASH=`egrep -he "^$PLAYER refunded" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
   PLAYER_REFUNDED_HANDS_CASH=$(incrementPlayerStatInDB "$PLAYER" "refunded_hands_cash" $PLAYER_REFUNDED_HANDS_CASH)    
-  PLAYER_WON_HANDS_CASH=`egrep -he "$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
+  PLAYER_WON_HANDS_CASH=`egrep -he "^$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
   PLAYER_WON_HANDS_CASH=$(incrementPlayerStatInDB "$PLAYER" "won_hands_cash" $PLAYER_WON_HANDS_CASH)
 
-  PLAYER_TOTAL_WON_POT_SIZE_CASH=`egrep -he "$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_CASH | egrep -o "\(.*\)" | egrep -oe '\([0-9]{1,}\.?.*\)' | tr -d '()' | awk '{s+=$1} END {print s}'`
+  PLAYER_TOTAL_WON_POT_SIZE_CASH=`egrep -he "^$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_CASH | egrep -o "\(.*\)" | egrep -oe '\([0-9]{1,}\.?.*\)' | tr -d '()' | awk '{s+=$1} END {print s}'`
   if [[ -z $PLAYER_TOTAL_WON_POT_SIZE_CASH ]]; then
     PLAYER_TOTAL_WON_POT_SIZE_CASH=0
   fi
 
   PLAYER_TOTAL_WON_POT_SIZE_CASH=$(incrementPlayerStatInDB "$PLAYER" "total_won_pot_size_cash" $PLAYER_TOTAL_WON_POT_SIZE_CASH)
-  PLAYER_ALL_INS_CASH=`egrep -he "$PLAYER .*(All-in)" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
+  PLAYER_ALL_INS_CASH=`egrep -he "^$PLAYER .*\(All-in\)" $GREP_FILE_PATTERN_CASH | wc -l | sed -e 's/^[[:space:]]*//'`
   PLAYER_ALL_INS_CASH=$(incrementPlayerStatInDB "$PLAYER" "all_ins_cash" $PLAYER_ALL_INS_CASH)
   PLAYER_HANDS_PLAYED_CASH=`python scripts/hands-played.py --player $PLAYER --pattern "$GREP_FILE_PATTERN_CASH"`
   PLAYER_HANDS_PLAYED_CASH=$(incrementPlayerStatInDB "$PLAYER" "hands_played_cash" $PLAYER_HANDS_PLAYED_CASH)
   
   # compare the currently known largest pot won to the largest one from the sample set for this sync
   CURRENT_BIGGEST_CASH_HAND=$(getPlayerStatFromDB "$PLAYER" "largest_pot_won_cash")
-  PLAYER_BIGGEST_CASH_HAND=`egrep -ho "$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_CASH | egrep -o "\(.*\)" | egrep -o "[0-9,.]+" | sort -n | tail -n 1`
+  PLAYER_BIGGEST_CASH_HAND=`egrep -ho "^$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_CASH | egrep -o "\(.*\)" | egrep -o "[0-9,.]+" | sort -n | tail -n 1`
   if [[ -z $PLAYER_BIGGEST_CASH_HAND ]]; then
     PLAYER_BIGGEST_CASH_HAND=0
   fi
@@ -204,7 +204,7 @@ for i in "${!PLAYERS[@]}"; do
   do
     for SECOND_CARD in "${HANDS[@]}"
     do
-      PLAYER_HOLE_CARD_COUNT=`egrep -oh "$PLAYER \(.*\) (\[$FIRST_CARD\w $SECOND_CARD\w\])" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
+      PLAYER_HOLE_CARD_COUNT=`egrep -oh "Seat [0-9]+: $PLAYER \(.*\) (\[$FIRST_CARD\w $SECOND_CARD\w\])" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
       UPDATE_PLAYER_SPECIFIC_HAND_SQL="UPDATE player_hands SET cards_$FIRST_CARD$SECOND_CARD = cards_$FIRST_CARD$SECOND_CARD + $PLAYER_HOLE_CARD_COUNT WHERE name = '$PLAYER'"
       executeSQL "$UPDATE_PLAYER_SPECIFIC_HAND_SQL"
     done
