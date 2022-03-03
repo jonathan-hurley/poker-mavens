@@ -37,6 +37,13 @@ echo -e "\n========= TOURNAMENT GROSS ========="
 TOURNAMENT_TABLE_BODY=
 for PLAYER in "${PLAYERS[@]}"
 do
+  # if the player has never entered a tournament, skip them
+  PLAYER_NUMBER_OF_TOURNAMENTS=$(getPlayerStatFromDB "$PLAYER" "tournaments_entered")
+  if [[ $PLAYER_NUMBER_OF_TOURNAMENTS == 0 ]]; then
+    echo "$PLAYER: $0 (0)"
+    continue
+  fi
+
   # first calculate buy-ins spent
   BUY_IN_TOTAL=$(getPlayerStatFromDB "$PLAYER" "tournament_total_spent")
 

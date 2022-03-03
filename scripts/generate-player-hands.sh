@@ -59,6 +59,12 @@ for i in "${!PLAYERS[@]}"; do
               </div>
             </div>
   "
+  
+  # fetch total of all hands dealt for this player
+  PLAYER_TOTAL_HANDS_DEALT=$(getPlayerStatFromDB "$PLAYER" "total_hands_dealt")
+  if [[ $PLAYER_TOTAL_HANDS_DEALT -eq 0 ]]; then
+    continue
+  fi
 
   # navigation
   PLAYER_NAV_TR="<a class=\"nav-link small $ACTIVE\" id=\"v-pills-$PLAYER-tab\" data-toggle=\"pill\" href=\"#v-pills-$PLAYER\" role=\"tab\" aria-controls=\"v-pills-$PLAYER\" aria-selected=\"$SELECTED\">$PLAYER</a>"
@@ -68,12 +74,6 @@ for i in "${!PLAYERS[@]}"; do
   PLAYER_LEAST_COMMON_HAND_COUNT=99999
 
   PLAYER_ALL_TRS=""
-
-  # fetch total of all hands dealt for this player
-  PLAYER_TOTAL_HANDS_DEALT=$(getPlayerStatFromDB "$PLAYER" "total_hands_dealt")
-  if [[ $PLAYER_TOTAL_HANDS_DEALT -eq 0 ]]; then
-    continue
-  fi
   
   for FIRST_CARD in "${HANDS[@]}"
   do
