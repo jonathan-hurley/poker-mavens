@@ -8,8 +8,10 @@ HANDS=( "A" "K" "Q" "J" "T" "9" "8" "7" "6" "5" "4" "3" "2" )
 # now that the databae is done, let's generate HTML
 DATE=`date "+Generated on %B %d, %Y"`
 
-PLAYER_NAV_BODY=""
+MAX_PLAYERS_PER_COLUMN=19
+
 ALL_PLAYERS_BODY=""
+PLAYER_NAV_BODY="<div class="col">"
 
 for i in "${!PLAYERS[@]}"; do 
   PLAYER="${PLAYERS[$i]}"
@@ -20,6 +22,12 @@ for i in "${!PLAYERS[@]}"; do
   if [[ $i -eq 0 ]]; then
     ACTIVE="active"
     SELECTED="true"
+  fi
+
+  # create new column
+  CURRENT_PLAYER_INDEX=$(expr $i + 1)
+  if [[ $(expr $CURRENT_PLAYER_INDEX % $MAX_PLAYERS_PER_COLUMN) -eq 0 ]]; then
+    PLAYER_NAV_BODY="$PLAYER_NAV_BODY </div><div class="col">"
   fi
 
   # table body template for this player
@@ -59,7 +67,7 @@ for i in "${!PLAYERS[@]}"; do
               </div>
             </div>
   "
-  
+
   # fetch total of all hands dealt for this player
   PLAYER_TOTAL_HANDS_DEALT=$(getPlayerStatFromDB "$PLAYER" "total_hands_dealt")
   if [[ $PLAYER_TOTAL_HANDS_DEALT -eq 0 ]]; then
@@ -116,6 +124,9 @@ for i in "${!PLAYERS[@]}"; do
   PLAYER_HOLE_CARDS_DATA="${PLAYER_HOLE_CARDS_TEMPLATE//_PLAYER_HOLE_CARD_DATA_/$PLAYER_ALL_TRS}"
   ALL_PLAYERS_BODY="$ALL_PLAYERS_BODY $PLAYER_HOLE_CARDS_DATA"
 done
+
+# close last div on the navigation pills
+PLAYER_NAV_BODY="$PLAYER_NAV_BODY </div>"
 
 HTML_CONTENT=$(awk -v r="$PLAYER_NAV_BODY" '{gsub(/_PLAYERS_NAVIGATION_/,r)}1' templates/player-hands.tmpl)
 HTML_CONTENT="${HTML_CONTENT//_PLAYER_HOLE_CARD_BODY_/$ALL_PLAYERS_BODY}"
