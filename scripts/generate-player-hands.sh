@@ -11,7 +11,7 @@ DATE=`date "+Generated on %B %d, %Y"`
 MAX_PLAYERS_PER_COLUMN=19
 
 ALL_PLAYERS_BODY=""
-PLAYER_NAV_BODY="<div class="col">"
+PLAYER_NAV_BODY="<div class="col-small">"
 
 for i in "${!PLAYERS[@]}"; do 
   PLAYER="${PLAYERS[$i]}"
@@ -27,7 +27,7 @@ for i in "${!PLAYERS[@]}"; do
   # create new column
   CURRENT_PLAYER_INDEX=$(expr $i + 1)
   if [[ $(expr $CURRENT_PLAYER_INDEX % $MAX_PLAYERS_PER_COLUMN) -eq 0 ]]; then
-    PLAYER_NAV_BODY="$PLAYER_NAV_BODY </div><div class="col">"
+    PLAYER_NAV_BODY="$PLAYER_NAV_BODY </div><div class="col-small">"
   fi
 
   # table body template for this player
