@@ -1,5 +1,5 @@
 # Poker Mavens Assets & Supporting Files
-This repository contains scripts and asset files for Poker Mavens v6.x. 
+This repository contains scripts and asset files for Poker Mavens v7.x. 
 
 The following is an abbreviated list of what kinds of statistics are calculated:
 - Site-wide statistics such as total number of hands, types of hands, winning hands, pocket pairs, etc
