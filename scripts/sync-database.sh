@@ -109,8 +109,8 @@ TWO_PAIR_OMAHA=`egrep -he '.*shows.*Two Pair' $GREP_FILE_PATTERN_OMAHA | wc -l |
 TWO_PAIR_OMAHA=$(incrementGameHandInDB "omaha" "two_pair" $TWO_PAIR_OMAHA)
 PAIR_OMAHA=`egrep -he '.*shows.*a Pair' $GREP_FILE_PATTERN_OMAHA | wc -l | sed -e 's/^[[:space:]]*//'`
 PAIR_OMAHA=$(incrementGameHandInDB "omaha" "pair" $PAIR_OMAHA)
-HIGH_OMAHA_CARD=`egrep -he '.*shows.*High Card' $GREP_FILE_PATTERN_OMAHA | wc -l | sed -e 's/^[[:space:]]*//'`
-HIGH_OMAHA_CARD=$(incrementGameHandInDB "omaha" "high_card" $HIGH_OMAHA_CARD)
+HIGH_CARD_OMAHA=`egrep -he '.*shows.*High Card' $GREP_FILE_PATTERN_OMAHA | wc -l | sed -e 's/^[[:space:]]*//'`
+HIGH_CARD_OMAHA=$(incrementGameHandInDB "omaha" "high_card" $HIGH_CARD_OMAHA)
 
 # process site pocket pairs
 echo "[$(date +'%I:%M:%S')] → Processing all site pocket pairs..."

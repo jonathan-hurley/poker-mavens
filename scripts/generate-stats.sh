@@ -31,9 +31,9 @@ if [[ $TOTAL_PLAYER_HANDS_HOLDEM -gt 0 ]]; then
 fi
 
 # omaha hand ranking stats
-if [[ $TOTAL_PLAYER_HANDS_OMAHA -gt 0 ]]; then
-  ROYAL_FLUSH_OMAHA_PCT=$(bc <<< "scale=6; x = $ROYAL_OMAHA_FLUSHES / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
-  STRAIGHT_FLUSH_OMAHA_PCT=$(bc <<< "scale=6; x = $STRAIGHT_OMAHA_FLUSH / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
+if [[ $TOTAL_PLAYER_HANDS_OMAHA -gt 0 ]]; then  
+  ROYAL_FLUSH_OMAHA_PCT=$(bc <<< "scale=6; x = $ROYAL_FLUSHES_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
+  STRAIGHT_FLUSH_OMAHA_PCT=$(bc <<< "scale=6; x = $STRAIGHT_FLUSH_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
   QUADS_OMAHA_PCT=$(bc <<< "scale=6; x = $QUADS_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
   FULL_HOUSE_OMAHA_PCT=$(bc <<< "scale=6; x = $FULL_HOUSE_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
   FLUSH_OMAHA_PCT=$(bc <<< "scale=6; x = $FLUSH_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
@@ -41,7 +41,7 @@ if [[ $TOTAL_PLAYER_HANDS_OMAHA -gt 0 ]]; then
   THREE_KIND_OMAHA_PCT=$(bc <<< "scale=6; x = $THREE_KIND_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 4; x / 1")
   TWO_PAIR_OMAHA_PCT=$(bc <<< "scale=4; x = $TWO_PAIR_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 2; x / 1")
   PAIR_OMAHA_PCT=$(bc <<< "scale=4; x = $PAIR_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 2; x / 1")
-  HIGH_OMAHA_CARD_PCT=$(bc <<< "scale=4; x = $HIGH_CARD_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 2; x / 1")
+  HIGH_CARD_OMAHA_PCT=$(bc <<< "scale=4; x = $HIGH_CARD_OMAHA / $TOTAL_PLAYER_HANDS_OMAHA * 100; scale = 2; x / 1")
 fi
 
 # showdown stats
