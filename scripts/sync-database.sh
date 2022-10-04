@@ -25,7 +25,7 @@ TOTAL_PLAYER_HANDS=`ggrep -E -he 'Seat.*\[(\w| )+]' $GREP_FILE_PATTERN_ALL | wc 
 TOTAL_PLAYER_HANDS=$(incrementSitePropertyInDB "total_hands" $TOTAL_PLAYER_HANDS)
 TOTAL_PLAYER_HANDS_HOLDEM=`ggrep -E -he 'Seat.*\[\w\w \w\w\]' $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
 TOTAL_PLAYER_HANDS_HOLDEM=$(incrementSitePropertyInDB "total_hands_holdem" $TOTAL_PLAYER_HANDS_HOLDEM)
-TOTAL_PLAYER_HANDS_OMAHA=`ggrep -E -he 'Seat.*\[\w\w \w\w\ \w\w\ \w\w\]' $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
+TOTAL_PLAYER_HANDS_OMAHA=`ggrep -E -he 'Seat.*\[\w\w \w\w \w\w \w\w\]' $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
 TOTAL_PLAYER_HANDS_OMAHA=$(incrementSitePropertyInDB "total_hands_omaha" $TOTAL_PLAYER_HANDS_OMAHA)
 TABLE_HANDS=`ggrep -E -he 'Hand #' $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//'`
 TABLE_HANDS=$(incrementSitePropertyInDB "table_hands" $TABLE_HANDS)
@@ -41,11 +41,11 @@ POCKET_AA=`ggrep -E -he 'Seat.*\[A\w A\w\]' $GREP_FILE_PATTERN_HOLDEM | wc -l | 
 POCKET_AA=$(incrementSitePropertyInDB "pocket_aa" $POCKET_AA)
 AK_HANDS_TOTAL=`ggrep -E -h "^.* \(.*\) (\[A\w K\w\]|\[K\w A\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
 AK_HANDS_TOTAL=$(incrementSitePropertyInDB "ace_king_total" $AK_HANDS_TOTAL)
-AK_HANDS_LOST=`ggrep -E -h "^.* (\(\-.*\)|\(\+0\)) (\[A\w K\w\]|\[K\w A\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
+AK_HANDS_LOST=`ggrep -E -h "^.* (\(-.*\)|\(\+0\)) (\[A\w K\w\]|\[K\w A\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
 AK_HANDS_LOST=$(incrementSitePropertyInDB "ace_king_lost" $AK_HANDS_LOST)
 SEVENTWO_HANDS_TOTAL=`ggrep -E -h "^.* \(.*\) (\[7\w 2\w\]|\[2\w 7\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
 SEVENTWO_HANDS_TOTAL=$(incrementSitePropertyInDB "seven_two_total" $SEVENTWO_HANDS_TOTAL)
-SEVENTWO_HANDS_LOST=`ggrep -E -h "^.* (\(\-.*\)|\(\+0\)) (\[7\w 2\w\]|\[2\w 7\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
+SEVENTWO_HANDS_LOST=`ggrep -E -h "^.* (\(-.*\)|\(\+0\)) (\[7\w 2\w\]|\[2\w 7\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
 SEVENTWO_HANDS_LOST=$(incrementSitePropertyInDB "seven_two_lost" $SEVENTWO_HANDS_LOST)
 HAND_ENDS_PREFLOP_TOURNAMENT=`ggrep -E -he 'End: PreFlop' $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
 HAND_ENDS_PREFLOP_TOURNAMENT=$(incrementSitePropertyInDB "hand_ends_preflop_tournament" $HAND_ENDS_PREFLOP_TOURNAMENT)
@@ -123,7 +123,7 @@ do
   POCKET_PAIR_HANDS_WON=$(incrementPocketPairStatInDB "$CARD$CARD" "total_won" $POCKET_PAIR_HANDS_WON)
   POCKET_PAIR_HANDS_WON_SHOWDOWN=`ggrep -E -h "^.* \(\+.*\) (\[$CARD\w $CARD\w\]) Showdown" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
   POCKET_PAIR_HANDS_WON_SHOWDOWN=$(incrementPocketPairStatInDB "$CARD$CARD" "total_won_at_showdown" $POCKET_PAIR_HANDS_WON_SHOWDOWN)
-  POCKET_PAIR_HANDS_LOST=`ggrep -E -h "^.* \(\-.*\) (\[$CARD\w $CARD\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
+  POCKET_PAIR_HANDS_LOST=`ggrep -E -h "^.* \(-.*\) (\[$CARD\w $CARD\w\])" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//'`
   POCKET_PAIR_HANDS_LOST=$(incrementPocketPairStatInDB "$CARD$CARD" "lost" $POCKET_PAIR_HANDS_LOST)
 done
 echo ""
