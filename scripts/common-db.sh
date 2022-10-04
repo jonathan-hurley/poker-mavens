@@ -254,8 +254,8 @@ function copyFilesSinceLastSync() {
   # copy PM files out to directories for easier grep'ing
   grep -l "Starting tournament\|finishes tournament in place" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $TOURNMANENT_TEMP_DIR
   grep -L "Starting tournament\|finishes tournament in place" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $CASH_TEMP_DIR
-  egrep -l -m 1 "Game: (.*?)Hold'em" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $HOLDEM_TEMP_DIR
-  egrep -l -m 1 "Game: (.*?)Omaha" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $OMAHA_TEMP_DIR  
+  ggrep -E -l -m 1 "Game: (.*?)Hold'em" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $HOLDEM_TEMP_DIR
+  ggrep -E -l -m 1 "Game: (.*?)Omaha" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $OMAHA_TEMP_DIR  
 }
 
 # gets the player cash total, including the offset, from the database
@@ -291,7 +291,7 @@ function updatePlayerBuyInTotal(){
   TOTAL=0
   GROSS_TOTAL=0
   
-  TOURNAMENT_FILES=$(egrep -l "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS)
+  TOURNAMENT_FILES=$(ggrep -E -l "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS)
 
   # if there are no tournament files then bail
   if [[ -z $TOURNAMENT_FILES ]]; then
@@ -300,12 +300,12 @@ function updatePlayerBuyInTotal(){
   fi  
 
   while read -r TOURNAMENT_FILE; do
-    BUY_IN=`egrep -h "BuyIn" "$TOURNAMENT_FILE" | egrep -oe "[0-9|.]+\+[0-9]+" | awk '{s+=$1} END {print s}' | bc`
+    BUY_IN=`ggrep -E -h "BuyIn" "$TOURNAMENT_FILE" | ggrep -E -oe "[0-9|.]+\+[0-9]+" | awk '{s+=$1} END {print s}' | bc`
     if [[ -z $BUY_IN ]]; then
       BUY_IN=0
     fi
 
-    REBUYS=`egrep -h "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | egrep -oe "Rebuys:[0-9]+" | tr -d 'Rebuys:'`
+    REBUYS=`ggrep -E -h "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | ggrep -E -oe "Rebuys:[0-9]+" | tr -d 'Rebuys:'`
     if [[ -z $REBUYS ]]; then
       REBUYS=0
     fi
@@ -321,7 +321,7 @@ function updatePlayerBuyInTotal(){
 # also handles bounties of the form ($0+$0)
 function updatePlayerNumberOfCashes(){
   PLAYER=$1
-  NUMBER_OF_CASHES=$(egrep -h "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | egrep -oe "\(.*\)" | egrep -v "\(0\)|\(0\+0\)" | tr -d '()' | wc -l | sed -e 's/^[[:space:]]*//')
+  NUMBER_OF_CASHES=$(ggrep -E -h "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | ggrep -E -oe "\(.*\)" | ggrep -E -v "\(0\)|\(0\+0\)" | tr -d '()' | wc -l | sed -e 's/^[[:space:]]*//')
   if [[ -z $NUMBER_OF_CASHES ]]; then
     NUMBER_OF_CASHES=0
   fi
@@ -334,7 +334,7 @@ function updatePlayerNumberOfCashes(){
 # also handles bounties of the form ($0+$0)
 function updatePlayerTournamentWinnings(){
   PLAYER=$1
-  TOURNAMENT_WINNINGS=$(egrep -h "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | egrep -oe "\(.*\)" | tr -d '()' | bc | awk '{s+=$1}END{print s}')
+  TOURNAMENT_WINNINGS=$(ggrep -E -h "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | ggrep -E -oe "\(.*\)" | tr -d '()' | bc | awk '{s+=$1}END{print s}')
 
   if [[ -z $TOURNAMENT_WINNINGS ]]; then
     TOURNAMENT_WINNINGS=0
@@ -357,7 +357,7 @@ function updatePlayerCashTotal(){
   # We used to use the search by game name (ie Sizzler) but can't do that anymore since we want other games to show up
   # This file also works around the "incremental update" issue on a single file by piping results through awk to compare dates
   # from the last time the sync ran
-  PLAYER_CASH_CHANGE=$(egrep -h "House\|Ring.*\($PLAYER .*\)" $GREP_FILE_PATTERN_LOG | awk "\$0 > \"$LAST_SYNC_DATE\"" | egrep -oe "House\|Ring.*balance" | egrep -oe "[-|+][0-9]+(\.[0-9]+)?" | awk '{s+=$1*-1} END {print s}')
+  PLAYER_CASH_CHANGE=$(ggrep -E -h "House\|Ring.*\($PLAYER .*\)" $GREP_FILE_PATTERN_LOG | awk "\$0 > \"$LAST_SYNC_DATE\"" | ggrep -E -oe "House\|Ring.*balance" | ggrep -E -oe "[-|+][0-9]+(\.[0-9]+)?" | awk '{s+=$1*-1} END {print s}')
   if [[ -z $PLAYER_CASH_CHANGE ]]; then
     PLAYER_CASH_CHANGE=0
   fi

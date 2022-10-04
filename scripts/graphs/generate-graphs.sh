@@ -18,9 +18,9 @@ SMACKDOWN_TOURNAMENT_FILE_PATTERN="${SMACKDOWN_TOURNAMENT_FILE_PATTERN}*"
 
 # dump all table files to a temp file and get sorted timestamp
 find $PM_DATA_HAND_HISTORY_DIR/ -name "$LOCKDOWN_TOURNAMENT_FILE_PATTERN" -exec cat "{}" >> "$LOCKDOWN_TMP" +
-LOCKDOWN_SORTED_HANDS=`egrep -h -e "Hand" $LOCKDOWN_TMP | awk '{print $4 " " $5}' | sort`
+LOCKDOWN_SORTED_HANDS=`ggrep -E -h -e "Hand" $LOCKDOWN_TMP | awk '{print $4 " " $5}' | sort`
 find $PM_DATA_HAND_HISTORY_DIR/ -name "$SMACKDOWN_TOURNAMENT_FILE_PATTERN" -exec cat "{}" >> "$SMACKDOWN_TMP" +
-SMACKDOWN_SORTED_HANDS=`egrep -h -e "Hand" $SMACKDOWN_TMP | awk '{print $4 " " $5}' | sort`
+SMACKDOWN_SORTED_HANDS=`ggrep -E -h -e "Hand" $SMACKDOWN_TMP | awk '{print $4 " " $5}' | sort`
 
 generatePlotData "$LOCKDOWN_TMP" "$LOCKDOWN_SORTED_HANDS" "$LOCKDOWN_PLOT_DATA_TMP"
 generatePlotData "$SMACKDOWN_TMP" "$SMACKDOWN_SORTED_HANDS" "$SMACKDOWN_PLOT_DATA_TMP"

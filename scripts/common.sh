@@ -30,7 +30,7 @@ then
 fi
 
 # ensure that command we use are available on the path
-requiredCommands=( grep egrep bc sed tidy sqlite3 )
+requiredCommands=( grep ggrep -E bc sed tidy sqlite3 )
 for requiredCommandName in "${requiredCommands[@]}"
 do
   command -v $requiredCommandName &> /dev/null
@@ -71,10 +71,10 @@ function calculatePlayerAverageTournmanentFinish(){
 
   TOTAL_FINISHES=0
   SUM_FINISH_POSITION=0
-  TOURNAMENT_FILES=$(egrep -l "Place[0-9]+=$PLAYER " $PM_DATA_TOURNEY_DIR/*)  
+  TOURNAMENT_FILES=$(ggrep -E -l "Place[0-9]+=$PLAYER " $PM_DATA_TOURNEY_DIR/*)  
   while read -r TOURNAMENT_FILE; do
     # find the player's finish position
-    FINISH_POSITION=`egrep -oh "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | tail -1 | egrep -oh "Place[0-9]+=" | egrep -o "[0-9]+" | sed -e 's/^[[:space:]]*//'`
+    FINISH_POSITION=`ggrep -E -oh "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | tail -1 | ggrep -E -oh "Place[0-9]+=" | ggrep -E -o "[0-9]+" | sed -e 's/^[[:space:]]*//'`
     if [[ -z $FINISH_POSITION ]]; then      
       continue
     fi
@@ -83,10 +83,10 @@ function calculatePlayerAverageTournmanentFinish(){
 
     # see if there were mulitple finishes
     # first find the place (Place1=)
-    FINISH_POSITION_SUBSTRING=`egrep -oh "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | tail -1 | egrep -oh "Place[0-9]+="`
+    FINISH_POSITION_SUBSTRING=`ggrep -E -oh "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | tail -1 | ggrep -E -oh "Place[0-9]+="`
 
     # now find the number of finishes in that position (1 or 2 or 3)
-    FINISH_POSITIONS_SPLIT_COUNT=`egrep -oh "$FINISH_POSITION_SUBSTRING" "$TOURNAMENT_FILE" | wc -l | sed -e 's/^[[:space:]]*//'`
+    FINISH_POSITIONS_SPLIT_COUNT=`ggrep -E -oh "$FINISH_POSITION_SUBSTRING" "$TOURNAMENT_FILE" | wc -l | sed -e 's/^[[:space:]]*//'`
     if [[ $FINISH_POSITIONS_SPLIT_COUNT -gt 1 ]]; then
       splitSum=0
       counter=1      
