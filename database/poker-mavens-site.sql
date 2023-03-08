@@ -82,7 +82,6 @@ CREATE TABLE player_summary (
   shown_hands_tournament INTEGER DEFAULT 0 NOT NULL,
   refunded_hands_tournament INTEGER DEFAULT 0 NOT NULL,
   won_hands_tournament INTEGER DEFAULT 0 NOT NULL,
-  total_won_pot_size_tournament INTEGER DEFAULT 0 NOT NULL,
   all_ins_tournament INTEGER DEFAULT 0 NOT NULL,
   hands_played_tournament INTEGER DEFAULT 0 NOT NULL,
   tournaments_entered INTEGER DEFAULT 0 NOT NULL,

@@ -104,7 +104,6 @@ do
   PLAYER_SHOWN_HANDS_TOURNAMENT=$(getPlayerStatFromDB "$PLAYER" "shown_hands_tournament")
   PLAYER_REFUNDED_HANDS_TOURNAMENT=$(getPlayerStatFromDB "$PLAYER" "refunded_hands_tournament")
   PLAYER_WON_HANDS_TOURNAMENT=$(getPlayerStatFromDB "$PLAYER" "won_hands_tournament")
-  PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT=$(getPlayerStatFromDB "$PLAYER" "total_won_pot_size_tournament")
   PLAYER_ALL_INS_TOURNAMENT=$(getPlayerStatFromDB "$PLAYER" "all_ins_tournament")
   PLAYER_HANDS_PLAYED_TOURNAMENT=$(getPlayerStatFromDB "$PLAYER" "hands_played_tournament")
   PLAYER_NUMBER_OF_TOURNAMENTS=$(getPlayerStatFromDB "$PLAYER" "tournaments_entered")

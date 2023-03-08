@@ -153,12 +153,6 @@ for i in "${!PLAYERS[@]}"; do
   PLAYER_WON_HANDS_TOURNAMENT=`ggrep -E -he "^$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
   PLAYER_WON_HANDS_TOURNAMENT=$(incrementPlayerStatInDB "$PLAYER" "won_hands_tournament" $PLAYER_WON_HANDS_TOURNAMENT)
 
-  PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT=`ggrep -E -he "^$PLAYER wins (Side Pot [0-9]|Main Pot|Pot) \(.*\)" $GREP_FILE_PATTERN_TOURNAMENT | ggrep -E -o "\(.*\)" | ggrep -E -oe '\([0-9]{2,}\.?.*\)' | tr -d '()' | awk '{s+=$1} END {print s}'`
-  if [[ -z $PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT ]]; then
-    PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT=0
-  fi
-  PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT=$(incrementPlayerStatInDB "$PLAYER" "total_won_pot_size_tournament" $PLAYER_TOTAL_WON_POT_SIZE_TOURNAMENT)
-
   PLAYER_ALL_INS_TOURNAMENT=`ggrep -E -he "^$PLAYER .*\(All-in\)" $GREP_FILE_PATTERN_TOURNAMENT | wc -l | sed -e 's/^[[:space:]]*//'`
   PLAYER_ALL_INS_TOURNAMENT=$(incrementPlayerStatInDB "$PLAYER" "all_ins_tournament" $PLAYER_ALL_INS_TOURNAMENT)
   PLAYER_HANDS_PLAYED_TOURNAMENT=`python scripts/hands-played.py --player $PLAYER --pattern "$GREP_FILE_PATTERN_TOURNAMENT"`
