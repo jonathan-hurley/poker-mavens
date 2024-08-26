@@ -20,12 +20,22 @@ do
 
   echo "$PLAYER: \$$PLAYER_CASH_TOTAL"
 
-  # format total
+  PLAYER_FOLDED_HANDS_CASH=$(getPlayerStatFromDB "$PLAYER" "folded_hands_cash")
+  PLAYER_SHOWN_HANDS_CASH=$(getPlayerStatFromDB "$PLAYER" "shown_hands_cash")
+  PLAYER_REFUNDED_HANDS_CASH=$(getPlayerStatFromDB "$PLAYER" "refunded_hands_cash")
+  TOTAL_PLAYER_HANDS_DEALT_CASH=$(($PLAYER_FOLDED_HANDS_CASH + $PLAYER_SHOWN_HANDS_CASH + $PLAYER_REFUNDED_HANDS_CASH))
+
+  if [[ $PLAYER_CASH_TOTAL == "(redacted)" ]]; then
+    PLAYER_PPH=$PLAYER_CASH_TOTAL
+  else
+    PLAYER_PPH=$(bc <<< "scale=4; x = $PLAYER_CASH_TOTAL / ($TOTAL_PLAYER_HANDS_DEALT_CASH / 100); scale = 2; x / 1")
+  fi
 
   ROW_TEMPLATE="
                       <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">$PLAYER</td>
-                        <td class=\"cell100 stats-column2\"><span class="currency">$PLAYER_CASH_TOTAL</span></td>
+                        <td class=\"cell100 winnings-cell\">$PLAYER</td>
+                        <td class=\"cell100 winnings-cell\"><span class="currency">$PLAYER_CASH_TOTAL</span></td>
+                        <td class=\"cell100 winnings-cell\"><span class="currency">$PLAYER_PPH</span></td>
                       </tr>
 "
   CASH_TABLE_BODY="$CASH_TABLE_BODY $ROW_TEMPLATE"
@@ -40,7 +50,7 @@ do
   # if the player has never entered a tournament, skip them
   PLAYER_NUMBER_OF_TOURNAMENTS=$(getPlayerStatFromDB "$PLAYER" "tournaments_entered")
   if [[ $PLAYER_NUMBER_OF_TOURNAMENTS == 0 ]]; then
-    echo "$PLAYER: $0 (0)"
+    echo "$PLAYER: \$0 (0)"
     continue
   fi
 
@@ -60,26 +70,29 @@ do
     PLAYER_TOURNAMENT_WINNINGS=0
   fi
 
-  PLAYER_PROFIT=$(echo $PLAYER_TOURNAMENT_WINNINGS - $BUY_IN_TOTAL | bc)
+  PLAYER_PROFIT=$(bc <<< "scale=4; x = $PLAYER_TOURNAMENT_WINNINGS - $BUY_IN_TOTAL; scale = 2; x / 1")
+  PLAYER_ROI=$(bc <<< "scale=4; x = $PLAYER_PROFIT / $BUY_IN_TOTAL * 100; scale = 2; x / 1")
 
   # standardize on 2 decimal places
   PLAYER_TOURNAMENT_WINNINGS=$(printf "%0.2f" $PLAYER_TOURNAMENT_WINNINGS)
   PLAYER_PROFIT=$(printf "%0.2f" $PLAYER_PROFIT)
+  PLAYER_ROI=$(printf "%0.2f" $PLAYER_ROI)
 
   echo "$PLAYER: \$$PLAYER_TOURNAMENT_WINNINGS ($PLAYER_TOURNAMENT_CASHES)"
 
   ROW_TEMPLATE="
                       <tr class=\"row100 body\">
                         <td class=\"cell100 winnings-cell\">$PLAYER</td>
-                        <td class=\"cell100 winnings-cell\"><span class="currency">$PLAYER_TOURNAMENT_WINNINGS</span></td>
-                        <td class=\"cell100 winnings-cell\"><span class="currency">$PLAYER_PROFIT</span></td>
+                        <td class=\"cell100 winnings-cell\"><span class=\"currency\">$PLAYER_TOURNAMENT_WINNINGS</span></td>
+                        <td class=\"cell100 winnings-cell\"><span class=\"currency\">$PLAYER_PROFIT</span></td>
                         <td class=\"cell100 winnings-cell\">$PLAYER_TOURNAMENT_CASHES</td>
+                        <td class=\"cell100 winnings-cell\"><span class=\"percentage\">$PLAYER_ROI</span></td>
                       </tr>
 "
   TOURNAMENT_TABLE_BODY="$TOURNAMENT_TABLE_BODY $ROW_TEMPLATE"
 done
 
-FINAL=$(awk -v r="$CASH_TABLE_BODY" '{gsub(/_CASH_TABLE_BODY_/,r)}1' templates/winnings.tmpl)
+FINAL=$(awk -v r="$CASH_TABLE_BODY" '{gsub(/_CASH_TABLE_BODY_/,r)}1' templates/winnings.html)
 FINAL="${FINAL/_GENERATED_ON_/$DATE}"
 FINAL="${FINAL//_POKER_SITE_NAME_/$POKER_SITE_NAME}"
 FINAL="${FINAL/_TOURNAMENT_TABLE_BODY_/$TOURNAMENT_TABLE_BODY}"

@@ -27,10 +27,10 @@ As this guide has been written assuming minimal knowledge and capabilities of th
 The scripts below will create static HTML pages that you can have Poker Mavens host. There's a configuration under `System` -> `Web Settings` -> `Web Folder`. This can point directly to the folder in this repository called `web`. 
 
 ## Getting Started
-Depending on which operating system you are using, you may need to download one or more of the following supporting files. 
+Depending on which operating system you are using, you may need to download one or more of the following supporting files. Unless otherwise stated, all versions of these tools are the GNU version.
 - `bash`
 - `sed`
-- `grep` / `egrep`
+- `grep`
 - `bc`
 - `printf`
 - `python`
@@ -133,7 +133,7 @@ The files in `models` are poker related 3D models that I had nowhere else to put
 The scripts located in `scripts/graphs` are used to generate graphs which show the stack sizes of players during a tournament.
 - `generate-graphs.sh` is the top level script which can be run. It relies on the following tools:
   - `gnuplot`
-  - `grep`/`egrep`/`pcregrep`
+  - `grep`/`pcregrep`
 - `players.sh` is used to list all players which should be processed
 - `generatePlotData.sh` reads in starting stack sizes from Poker Mavens and generates temporary files formatted for `gnuplot` with stack size data
 - `*.plot` files are used by `gnuplot` to generate SVGs

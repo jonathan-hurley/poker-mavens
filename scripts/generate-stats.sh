@@ -2,11 +2,9 @@
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/players.sh"
-. "$DIR/common.sh"
+. "$DIR/common-db.sh"
 
 DATE=`date "+Generated on %B %d, %Y"`
-
-HANDS=( "A" "K" "Q" "J" "T" "9" "8" "7" "6" "5" "4" "3" "2" )
 
 FLOPS_SEEN_PCT=$(bc <<< "scale=4; x = $FLOPS_SEEN / $TABLE_HANDS * 100; scale = 2; x / 1")
 FLOPS_WITH_SAME_SUIT_PCT=$(bc <<< "scale=4; x = $FLOPS_WITH_SAME_SUIT / $FLOPS_SEEN * 100; scale = 2; x / 1")
@@ -82,6 +80,7 @@ AK_HANDS_WON=$(printf "%'d" $AK_HANDS_WON)
 SEVENTWO_HANDS_WON=$(printf "%'d" $SEVENTWO_HANDS_WON)
 
 TABLE_BODY=""
+PLAYER_HANDS_BODY=""
 PLAYER_POCKET_PAIRS_BODY=""
 PLAYERS_SUMMARY="========= TOURNAMENT WINNINGS =========\n"
 
@@ -117,6 +116,7 @@ do
   PLAYER_ALL_INS_CASH=$(getPlayerStatFromDB "$PLAYER" "all_ins_cash")
   PLAYER_HANDS_PLAYED_CASH=$(getPlayerStatFromDB "$PLAYER" "hands_played_cash")  
   PLAYER_BIGGEST_CASH_HAND=$(getPlayerStatFromDB "$PLAYER" "largest_pot_won_cash")
+  PLAYER_BIGGEST_CASH_HAND_LOST=$(getPlayerStatFromDB "$PLAYER" "largest_pot_lost_cash")
 
   PPP_ROW_TEMPLATE="<tr class=\"row100 body\"><td class=\"playerpocketpair-cell\">$PLAYER</td>"
 
@@ -152,6 +152,7 @@ do
   PLAYER_ALL_INS_CASH_RATE=0
   PLAYER_ALL_INS_TOURNAMENT_PCT=0
   PLAYER_ALL_INS_TOURNAMENT_RATE=0
+  
   if [[ $PLAYER_HANDS_PLAYED_CASH != 0 ]]; then
     HANDS_WON_CASH_PCT=$(bc <<< "scale=4; x = $PLAYER_WON_HANDS_CASH / $PLAYER_HANDS_PLAYED_CASH * 100; scale = 2; x / 1")
     HANDS_PLAYED_CASH_PCT=$(bc <<< "scale=4; x = $PLAYER_HANDS_PLAYED_CASH / $TOTAL_PLAYER_HANDS_DEALT_CASH * 100; scale = 2; x / 1")
@@ -173,6 +174,32 @@ do
 
   if [[ $TOTAL_PLAYER_HANDS_DEALT_TOURNAMENT == 0 ]] && [[ $TOTAL_PLAYER_HANDS_DEALT_CASH == 0 ]]; then
     continue
+  fi
+
+  # get the number of times a player has made it to showdown in holdem
+  PLAYER_SHOWDOWN_COUNT=$(getPlayerStatFromDB "$PLAYER" "total_hands_showdown")
+  if [[ $PLAYER_HANDS_PLAYED_TOURNAMENT != 0 ]]; then
+    # player hand stats
+    PLAYER_ROYAL_FLUSHES=$(getPlayerStatFromDB "$PLAYER" "royal_flush")
+    PLAYER_ROYAL_FLUSHES_PCT=$(printf '%3.2f' $(bc <<< "scale=4; x = $PLAYER_ROYAL_FLUSHES / $PLAYER_SHOWDOWN_COUNT * 100; scale = 2; x / 1"))
+    PLAYER_STRAIGHT_FLUSH=$(getPlayerStatFromDB "$PLAYER" "straight_flush")
+    PLAYER_STRAIGHT_FLUSH_PCT=$(printf '%3.2f' $(bc <<< "scale=4; x = $PLAYER_STRAIGHT_FLUSH / $PLAYER_SHOWDOWN_COUNT * 100; scale = 2; x / 1"))
+    PLAYER_QUADS=$(getPlayerStatFromDB "$PLAYER" "four_of_a_kind")
+    PLAYER_QUADS_PCT=$(printf '%3.2f' $(bc <<< "scale=4; x = $PLAYER_QUADS / $PLAYER_SHOWDOWN_COUNT * 100; scale = 2; x / 1"))
+    PLAYER_FULL_HOUSE=$(getPlayerStatFromDB "$PLAYER" "full_house")
+    PLAYER_FULL_HOUSE_PCT=$(printf '%3.2f' $(bc <<< "scale=4; x = $PLAYER_FULL_HOUSE / $PLAYER_SHOWDOWN_COUNT * 100; scale = 2; x / 1"))
+    PLAYER_FLUSH=$(getPlayerStatFromDB "$PLAYER" "flush")
+    PLAYER_FLUSH_PCT=$(printf '%3.2f' $(bc <<< "scale=4; x = $PLAYER_FLUSH / $PLAYER_SHOWDOWN_COUNT * 100; scale = 2; x / 1"))
+    PLAYER_STRAIGHT=$(getPlayerStatFromDB "$PLAYER" "straight")
+    PLAYER_STRAIGHT_PCT=$(printf '%3.2f' $(bc <<< "scale=4; x = $PLAYER_STRAIGHT / $PLAYER_SHOWDOWN_COUNT * 100; scale = 2; x / 1"))
+    PLAYER_THREE_KIND=$(getPlayerStatFromDB "$PLAYER" "three_of_a_kind")
+    PLAYER_THREE_KIND_PCT=$(printf '%3.2f' $(bc <<< "scale=4; x = $PLAYER_THREE_KIND / $PLAYER_SHOWDOWN_COUNT * 100; scale = 2; x / 1"))
+    PLAYER_TWO_PAIR=$(getPlayerStatFromDB "$PLAYER" "two_pair")
+    PLAYER_TWO_PAIR_PCT=$(printf '%3.2f' $(bc <<< "scale=4; x = $PLAYER_TWO_PAIR / $PLAYER_SHOWDOWN_COUNT * 100; scale = 2; x / 1"))
+    PLAYER_PAIR=$(getPlayerStatFromDB "$PLAYER" "pair")
+    PLAYER_PAIR_PCT=$(printf '%3.2f' $(bc <<< "scale=4; x = $PLAYER_PAIR / $PLAYER_SHOWDOWN_COUNT * 100; scale = 2; x / 1"))
+    PLAYER_HIGH_CARD=$(getPlayerStatFromDB "$PLAYER" "high_card")
+    PLAYER_HIGH_CARD_PCT=$(printf '%3.2f' $(bc <<< "scale=4; x = $PLAYER_HIGH_CARD / $PLAYER_SHOWDOWN_COUNT * 100; scale = 2; x / 1"))
   fi
 
   # get player cash total from DB
@@ -201,33 +228,51 @@ do
   TOTAL_PLAYER_HANDS_DEALT_CASH_FORMATTED=$(printf "%'d" $TOTAL_PLAYER_HANDS_DEALT_CASH)
   TOTAL_PLAYER_HANDS_DEALT_TOURNAMENT=$(printf "%'d" $TOTAL_PLAYER_HANDS_DEALT_TOURNAMENT)
   PLAYER_BIGGEST_CASH_HAND=$(printf "%'.2Lf" $PLAYER_BIGGEST_CASH_HAND)
+  PLAYER_BIGGEST_CASH_HAND_LOST=$(printf "%'.2Lf" $PLAYER_BIGGEST_CASH_HAND_LOST)
 
   ROW_TEMPLATE_TOURNAMENT="
-                      <tr class=\"row100 body\">
-                        <td class=\"playerstats-cell\">$PLAYER</td>
-                        <td class=\"playerstats-cell\">$PLAYER_WON_HANDS_TOURNAMENT<br/>($HANDS_WON_TOURNAMENT_PCT%)</td>
-                        <td class=\"playerstats-cell\">$PLAYER_HANDS_PLAYED_TOURNAMENT<br/>($HANDS_PLAYED_TOURNAMENT_PCT%)</td>
-                        <td class=\"playerstats-cell\">$TOTAL_PLAYER_HANDS_DEALT_TOURNAMENT</td>
-                        <td class=\"playerstats-cell\">$PLAYER_ALL_INS_TOURNAMENT</td>
-                        <td class=\"playerstats-cell\">$PLAYER_NUMBER_OF_TOURNAMENTS</td>
-                        <td class=\"playerstats-cell\"><span class=\"currency\">$PLAYER_TOURNAMENT_WINNINGS</span></td>
-                        <td class=\"playerstats-cell\">$PLAYER_WINNING_ODDS_PCT%</td>
-                        <td class=\"playerstats-cell\">$PLAYER_AVG_FINISH_TH<br/>($PLAYER_AVG_FINISH_POSITION)</td>
-                      </tr>
-"
+    <tr class=\"row100 body\">
+      <td class=\"playerstats-cell\">$PLAYER</td>
+      <td class=\"playerstats-cell\">$PLAYER_WON_HANDS_TOURNAMENT<br/>($HANDS_WON_TOURNAMENT_PCT%)</td>
+      <td class=\"playerstats-cell\">$PLAYER_HANDS_PLAYED_TOURNAMENT<br/>($HANDS_PLAYED_TOURNAMENT_PCT%)</td>
+      <td class=\"playerstats-cell\">$TOTAL_PLAYER_HANDS_DEALT_TOURNAMENT</td>
+      <td class=\"playerstats-cell\">$PLAYER_ALL_INS_TOURNAMENT</td>
+      <td class=\"playerstats-cell\">$PLAYER_NUMBER_OF_TOURNAMENTS</td>
+      <td class=\"playerstats-cell\"><span class=\"currency\">$PLAYER_TOURNAMENT_WINNINGS</span></td>
+      <td class=\"playerstats-cell\">$PLAYER_WINNING_ODDS_PCT%</td>
+      <td class=\"playerstats-cell\">$PLAYER_AVG_FINISH_TH<br/>($PLAYER_AVG_FINISH_POSITION)</td>
+    </tr>
+  "
 
   ROW_TEMPLATE_CASH="
-                      <tr class=\"row100 body\">
-                        <td class=\"playerstats-cell\">$PLAYER</td>
-                        <td class=\"playerstats-cell\">$PLAYER_WON_HANDS_CASH<br/>($HANDS_WON_CASH_PCT%)</td>
-                        <td class=\"playerstats-cell\">$PLAYER_HANDS_PLAYED_CASH<br/>($HANDS_PLAYED_CASH_PCT%)</td>
-                        <td class=\"playerstats-cell\">$TOTAL_PLAYER_HANDS_DEALT_CASH_FORMATTED</td>
-                        <td class=\"playerstats-cell\">$PLAYER_ALL_INS_CASH</td>
-                        <td class=\"playerstats-cell\"><span class=\"posMoney\">$PLAYER_AVG_WON_POT_SIZE_CASH</span></td>
-                        <td class=\"playerstats-cell\"><span class=\"posMoney\">$PLAYER_BIGGEST_CASH_HAND</span></td>
-                        <td class=\"playerstats-cell\"><span class=\"currency\">$PLAYER_CASH_TOTAL</span></td>
-                      </tr>
-"
+    <tr class=\"row100 body\">
+      <td class=\"playerstats-cell\">$PLAYER</td>
+      <td class=\"playerstats-cell\">$PLAYER_WON_HANDS_CASH<br/>($HANDS_WON_CASH_PCT%)</td>
+      <td class=\"playerstats-cell\">$PLAYER_HANDS_PLAYED_CASH<br/>($HANDS_PLAYED_CASH_PCT%)</td>
+      <td class=\"playerstats-cell\">$TOTAL_PLAYER_HANDS_DEALT_CASH_FORMATTED</td>
+      <td class=\"playerstats-cell\">$PLAYER_ALL_INS_CASH</td>
+      <td class=\"playerstats-cell\"><span class=\"posMoney\">$PLAYER_AVG_WON_POT_SIZE_CASH</span></td>
+      <td class=\"playerstats-cell\"><span class=\"posMoney\">$PLAYER_BIGGEST_CASH_HAND</span></td>
+      <td class=\"playerstats-cell\"><span class=\"negMoney\">$PLAYER_BIGGEST_CASH_HAND_LOST</span></td>
+      <td class=\"playerstats-cell\"><span class=\"currency\">$PLAYER_CASH_TOTAL</span></td>
+    </tr>
+  "
+
+  ROW_TEMPLATE_PLAYER_HANDS="
+    <tr class=\"row100 body\">
+      <td class=\"cell100 stats-small-column\">$PLAYER</td>
+      <td class=\"cell100 stats-tiny-column\">$PLAYER_HIGH_CARD<br>($PLAYER_HIGH_CARD_PCT%)</td>
+      <td class=\"cell100 stats-tiny-column\">$PLAYER_PAIR<br>($PLAYER_PAIR_PCT%)</td>
+      <td class=\"cell100 stats-tiny-column\">$PLAYER_TWO_PAIR<br>($PLAYER_TWO_PAIR_PCT%)</td>
+      <td class=\"cell100 stats-tiny-column\">$PLAYER_THREE_KIND<br>($PLAYER_THREE_KIND_PCT%)</td>
+      <td class=\"cell100 stats-tiny-column\">$PLAYER_STRAIGHT<br>($PLAYER_STRAIGHT_PCT%)</td>
+      <td class=\"cell100 stats-tiny-column\">$PLAYER_FLUSH<br>($PLAYER_FLUSH_PCT%)</td>
+      <td class=\"cell100 stats-tiny-column\">$PLAYER_FULL_HOUSE<br>($PLAYER_FULL_HOUSE_PCT%)</td>
+      <td class=\"cell100 stats-tiny-column\">$PLAYER_QUADS<br>($PLAYER_QUADS_PCT%)</td>
+      <td class=\"cell100 stats-tiny-column\">$PLAYER_STRAIGHT_FLUSH<br>($PLAYER_STRAIGHT_FLUSH_PCT%)</td>
+      <td class=\"cell100 stats-tiny-column\">$PLAYER_ROYAL_FLUSHES<br>($PLAYER_ROYAL_FLUSHES_PCT%)</td>
+    </tr>
+  "
 
   # buld up the body
   TABLE_BODY_TOURNAMENT="$TABLE_BODY_TOURNAMENT $ROW_TEMPLATE_TOURNAMENT"
@@ -237,6 +282,9 @@ do
   fi
 
   PLAYERS_SUMMARY="$PLAYERS_SUMMARY$PLAYER: \$$PLAYER_TOURNAMENT_WINNINGS ($PLAYER_WINNING_ODDS_PCT%)\n"
+
+  # process the player hand rankings
+  PLAYER_HANDS_BODY="$PLAYER_HANDS_BODY $ROW_TEMPLATE_PLAYER_HANDS"
 
   # process per-player pocket pairs
   for CARD in "${HANDS[@]}"
@@ -264,8 +312,24 @@ done
 echo ""
 echo -e "$PLAYERS_SUMMARY"
 
-STATS_HTML_CONTENT=$(awk -v r="$TABLE_BODY_TOURNAMENT" '{gsub(/_PLAYER_TOURNAMENT_STATS_BODY_/,r)}1' templates/stats.tmpl)
+STATS_HTML_CONTENT=$(awk -v r="$TABLE_BODY_TOURNAMENT" '{gsub(/_PLAYER_TOURNAMENT_STATS_BODY_/,r)}1' templates/stats.html)
 STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_PLAYER_CASH_STATS_BODY_/$TABLE_BODY_CASH}"
+
+# some other basic replacements
+CASH_KING_STAT=$(getMostCashWinningsFromDB)
+STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_CASH_KING_/$CASH_KING_STAT}"
+
+BIG_WINNAH_STAT=$(getMostTournamentWinningsFromDB)
+STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_BIG_WINNAH_/$BIG_WINNAH_STAT}"
+
+MOST_TOURNAMENT_CASHES_STAT=$(getMostTournamentCashesFromDB)
+STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_MOST_TOURNAMENT_CASHES_/$MOST_TOURNAMENT_CASHES_STAT}"
+
+MOST_TOURNAMENT_WINS_STAT=$(getMostTournamentWinsFromDB)
+STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_MOST_TOURNAMENT_WINS_/$MOST_TOURNAMENT_WINS_STAT}"
+
+MOST_TOURNAMENT_CHOPS_STAT=$(getMostTournamentChopsFromDB)
+STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_MOST_TOURNAMENT_CHOPS_/$MOST_TOURNAMENT_CHOPS_STAT}"
 
 # create site-wide stats
 # format the big site-wide numbers
@@ -281,62 +345,62 @@ POCKET_AA=$(printf "%'d" $POCKET_AA)
 POCKET_AA_PCT=$(printf "%.2f" $POCKET_AA_PCT)
 
 SITE_STATS_TEMPLATE="
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Total Hands Dealt</td>
-                        <td class=\"cell100 stats-column2\">$TOTAL_PLAYER_HANDS_FORMATTED</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Total Hands By Game</td>
-                        <td class=\"cell100 stats-column2\">Hold 'Em: $TOTAL_PLAYER_HANDS_HOLDEM_FORMATTED
-                          <br/>Omaha: $TOTAL_PLAYER_HANDS_OMAHA_FORMATTED
-                        </td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Table Hands</td>
-                        <td class=\"cell100 stats-column2\">$TABLE_HANDS</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Flops Seen</td>
-                        <td class=\"cell100 stats-column2\">$FLOPS_SEEN ($FLOPS_SEEN_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Suited Flops</td>
-                        <td class=\"cell100 stats-column2\">$FLOPS_WITH_SAME_SUIT ($FLOPS_WITH_SAME_SUIT_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Pocket AA</td>
-                        <td class=\"cell100 stats-column2\">$POCKET_AA ($POCKET_AA_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">
-                          AK Wins<br/>
-                          72 Wins<br/>
-                        </td>
-                        <td class=\"cell100 stats-column2\">
-                          $AK_HANDS_WON ($AK_HANDS_WON_PCT%)<br/>
-                          $SEVENTWO_HANDS_WON ($SEVENTWO_HANDS_WON_PCT%)<br/>
-                        </td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Cash Hand Summary</td>
-                        <td class=\"cell100 stats-column2\">
-                          Pre-Flop: $HAND_ENDS_PREFLOP_CASH_PCT%<br>
-                          Flop: $HAND_ENDS_FLOP_CASH_PCT%<br>
-                          Turn: $HAND_ENDS_TURN_CASH_PCT%<br>
-                          River: $HAND_ENDS_RIVER_CASH_PCT%<br>
-                          Showdown: $HAND_ENDS_SHOWDOWN_CASH_PCT%<br>
-                        </td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Tournament Hand Summary</td>
-                        <td class=\"cell100 stats-column2\">
-                          Pre-Flop: $HAND_ENDS_PREFLOP_TOURNAMENT_PCT%<br>
-                          Flop: $HAND_ENDS_FLOP_TOURNAMENT_PCT%<br>
-                          Turn: $HAND_ENDS_TURN_TOURNAMENT_PCT%<br>
-                          River: $HAND_ENDS_RIVER_TOURNAMENT_PCT%<br>
-                          Showdown: $HAND_ENDS_SHOWDOWN_TOURNAMENT_PCT%<br>
-                        </td>
-                      </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-column1\">Total Hands Dealt</td>
+    <td class=\"cell100 stats-column2\">$TOTAL_PLAYER_HANDS_FORMATTED</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-column1\">Total Hands By Game</td>
+    <td class=\"cell100 stats-column2\">Hold 'Em: $TOTAL_PLAYER_HANDS_HOLDEM_FORMATTED
+      <br/>Omaha: $TOTAL_PLAYER_HANDS_OMAHA_FORMATTED
+    </td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-column1\">Table Hands</td>
+    <td class=\"cell100 stats-column2\">$TABLE_HANDS</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-column1\">Flops Seen</td>
+    <td class=\"cell100 stats-column2\">$FLOPS_SEEN ($FLOPS_SEEN_PCT%)</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-column1\">Suited Flops</td>
+    <td class=\"cell100 stats-column2\">$FLOPS_WITH_SAME_SUIT ($FLOPS_WITH_SAME_SUIT_PCT%)</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-column1\">Pocket AA</td>
+    <td class=\"cell100 stats-column2\">$POCKET_AA ($POCKET_AA_PCT%)</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-column1\">
+      AK Wins<br/>
+      72 Wins<br/>
+    </td>
+    <td class=\"cell100 stats-column2\">
+      $AK_HANDS_WON ($AK_HANDS_WON_PCT%)<br/>
+      $SEVENTWO_HANDS_WON ($SEVENTWO_HANDS_WON_PCT%)<br/>
+    </td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-column1\">Cash Hand Summary</td>
+    <td class=\"cell100 stats-column2\">
+      Pre-Flop: $HAND_ENDS_PREFLOP_CASH_PCT%<br>
+      Flop: $HAND_ENDS_FLOP_CASH_PCT%<br>
+      Turn: $HAND_ENDS_TURN_CASH_PCT%<br>
+      River: $HAND_ENDS_RIVER_CASH_PCT%<br>
+      Showdown: $HAND_ENDS_SHOWDOWN_CASH_PCT%<br>
+    </td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-column1\">Tournament Hand Summary</td>
+    <td class=\"cell100 stats-column2\">
+      Pre-Flop: $HAND_ENDS_PREFLOP_TOURNAMENT_PCT%<br>
+      Flop: $HAND_ENDS_FLOP_TOURNAMENT_PCT%<br>
+      Turn: $HAND_ENDS_TURN_TOURNAMENT_PCT%<br>
+      River: $HAND_ENDS_RIVER_TOURNAMENT_PCT%<br>
+      Showdown: $HAND_ENDS_SHOWDOWN_TOURNAMENT_PCT%<br>
+    </td>
+  </tr>
 "
 
 # format the little holdem numbers
@@ -348,49 +412,6 @@ FLUSH_PCT=$(printf "%.3f" $FLUSH_PCT)
 STRAIGHT_PCT=$(printf "%.3f" $STRAIGHT_PCT)
 THREE_KIND_PCT=$(printf "%.3f" $THREE_KIND_PCT)
 
-# holdem ranking template
-TABLE_HAND_STATS_TEMPLATE="
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Royal Flushes</td>
-                        <td class=\"cell100 stats-column2\">$ROYAL_FLUSHES ($ROYAL_FLUSH_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Straight Flushes</td>
-                        <td class=\"cell100 stats-column2\">$STRAIGHT_FLUSH ($STRAIGHT_FLUSH_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">4-of-a-Kind</td>
-                        <td class=\"cell100 stats-column2\">$QUADS ($QUADS_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Full House</td>
-                        <td class=\"cell100 stats-column2\">$FULL_HOUSE ($FULL_HOUSE_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Flush</td>
-                        <td class=\"cell100 stats-column2\">$FLUSH ($FLUSH_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Straight</td>
-                        <td class=\"cell100 stats-column2\">$STRAIGHT ($STRAIGHT_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">3-of-a-Kind</td>
-                        <td class=\"cell100 stats-column2\">$THREE_KIND ($THREE_KIND_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Two Pair</td>
-                        <td class=\"cell100 stats-column2\">$TWO_PAIR ($TWO_PAIR_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Pair</td>
-                        <td class=\"cell100 stats-column2\">$PAIR ($PAIR_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">High Card</td>
-                        <td class=\"cell100 stats-column2\">$HIGH_CARD ($HIGH_CARD_PCT%)</td>
-                      </tr>
-"
 # format the big omaha numbers
 FULL_HOUSE_OMAHA=$(printf "%'d" $FULL_HOUSE_OMAHA)
 FLUSH_OMAHA=$(printf "%'d" $FLUSH_OMAHA)
@@ -409,48 +430,58 @@ FLUSH_OMAHA_PCT=$(printf "%.3f" $FLUSH_OMAHA_PCT)
 STRAIGHT_OMAHA_PCT=$(printf "%.3f" $STRAIGHT_OMAHA_PCT)
 THREE_KIND_OMAHA_PCT=$(printf "%.3f" $THREE_KIND_OMAHA_PCT)
 
-# omaha ranking template
-TABLE_HAND_STATS_OMAHA_TEMPLATE="
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Royal Flushes</td>
-                        <td class=\"cell100 stats-column2\">$ROYAL_FLUSHES_OMAHA ($ROYAL_FLUSH_OMAHA_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Straight Flushes</td>
-                        <td class=\"cell100 stats-column2\">$STRAIGHT_FLUSH_OMAHA ($STRAIGHT_FLUSH_OMAHA_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">4-of-a-Kind</td>
-                        <td class=\"cell100 stats-column2\">$QUADS_OMAHA ($QUADS_OMAHA_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Full House</td>
-                        <td class=\"cell100 stats-column2\">$FULL_HOUSE_OMAHA ($FULL_HOUSE_OMAHA_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Flush</td>
-                        <td class=\"cell100 stats-column2\">$FLUSH_OMAHA ($FLUSH_OMAHA_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Straight</td>
-                        <td class=\"cell100 stats-column2\">$STRAIGHT_OMAHA ($STRAIGHT_OMAHA_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">3-of-a-Kind</td>
-                        <td class=\"cell100 stats-column2\">$THREE_KIND_OMAHA ($THREE_KIND_OMAHA_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Two Pair</td>
-                        <td class=\"cell100 stats-column2\">$TWO_PAIR_OMAHA ($TWO_PAIR_OMAHA_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">Pair</td>
-                        <td class=\"cell100 stats-column2\">$PAIR_OMAHA ($PAIR_OMAHA_PCT%)</td>
-                      </tr>
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-column1\">High Card</td>
-                        <td class=\"cell100 stats-column2\">$HIGH_CARD_OMAHA ($HIGH_CARD_OMAHA_PCT%)</td>
-                      </tr>
+# ranking template
+TABLE_HAND_STATS_TEMPLATE="
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-large-column\">Royal Flushes</td>
+    <td class=\"cell100 stats-medium-column\">$ROYAL_FLUSHES ($ROYAL_FLUSH_PCT%)</td>
+    <td class=\"cell100 stats-medium-column\">$ROYAL_FLUSHES_OMAHA ($ROYAL_FLUSH_OMAHA_PCT%)</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-large-column\">Straight Flushes</td>
+    <td class=\"cell100 stats-medium-column\">$STRAIGHT_FLUSH ($STRAIGHT_FLUSH_PCT%)</td>
+    <td class=\"cell100 stats-medium-column\">$STRAIGHT_FLUSH_OMAHA ($STRAIGHT_FLUSH_OMAHA_PCT%)</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-large-column\">4-of-a-Kind</td>
+    <td class=\"cell100 stats-medium-column\">$QUADS ($QUADS_PCT%)</td>
+    <td class=\"cell100 stats-medium-column\">$QUADS_OMAHA ($QUADS_OMAHA_PCT%)</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-large-column\">Full House</td>
+    <td class=\"cell100 stats-medium-column\">$FULL_HOUSE ($FULL_HOUSE_PCT%)</td>
+    <td class=\"cell100 stats-medium-column\">$FULL_HOUSE_OMAHA ($FULL_HOUSE_OMAHA_PCT%)</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-large-column\">Flush</td>
+    <td class=\"cell100 stats-medium-column\">$FLUSH ($FLUSH_PCT%)</td>
+    <td class=\"cell100 stats-medium-column\">$FLUSH_OMAHA ($FLUSH_OMAHA_PCT%)</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-large-column\">Straight</td>
+    <td class=\"cell100 stats-medium-column\">$STRAIGHT ($STRAIGHT_PCT%)</td>
+    <td class=\"cell100 stats-medium-column\">$STRAIGHT_OMAHA ($STRAIGHT_OMAHA_PCT%)</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-large-column\">3-of-a-Kind</td>
+    <td class=\"cell100 stats-medium-column\">$THREE_KIND ($THREE_KIND_PCT%)</td>
+    <td class=\"cell100 stats-medium-column\">$THREE_KIND_OMAHA ($THREE_KIND_OMAHA_PCT%)</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-large-column\">Two Pair</td>
+    <td class=\"cell100 stats-medium-column\">$TWO_PAIR ($TWO_PAIR_PCT%)</td>
+    <td class=\"cell100 stats-medium-column\">$TWO_PAIR_OMAHA ($TWO_PAIR_OMAHA_PCT%)</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-large-column\">Pair</td>
+    <td class=\"cell100 stats-medium-column\">$PAIR ($PAIR_PCT%)</td>
+    <td class=\"cell100 stats-medium-column\">$PAIR_OMAHA ($PAIR_OMAHA_PCT%)</td>
+  </tr>
+  <tr class=\"row100 body\">
+    <td class=\"cell100 stats-large-column\">High Card</td>
+    <td class=\"cell100 stats-medium-column\">$HIGH_CARD ($HIGH_CARD_PCT%)</td>
+    <td class=\"cell100 stats-medium-column\">$HIGH_CARD_OMAHA ($HIGH_CARD_OMAHA_PCT%)</td>
+  </tr>
 "
 
 # find all pocket pair stats
@@ -473,12 +504,12 @@ do
 
   # append another <td>
   POCKET_PAIR_TR="
-                      <tr class=\"row100 body\">
-                        <td class=\"cell100 stats-medium-column\">$CARD$CARD</td>
-                        <td class=\"cell100 stats-medium-column\">$POCKET_PAIR ($POCKET_PAIR_PCT%) 1-in-$POCKET_PAIR_ONE_IN</td>
-                        <td class=\"cell100 stats-medium-column\">$POCKET_PAIR_HANDS_WON ($POCKET_PAIR_HANDS_WON_PCT%)</td>
-                        <td class=\"cell100 stats-medium-column\">$POCKET_PAIR_HANDS_WON_SHOWDOWN ($POCKET_PAIR_HANDS_WON_SHOWDOWN_PCT%)</td>
-                      </tr>
+    <tr class=\"row100 body\">
+      <td class=\"cell100 stats-medium-column\">$CARD$CARD</td>
+      <td class=\"cell100 stats-medium-column\">$POCKET_PAIR ($POCKET_PAIR_PCT%) 1-in-$POCKET_PAIR_ONE_IN</td>
+      <td class=\"cell100 stats-medium-column\">$POCKET_PAIR_HANDS_WON ($POCKET_PAIR_HANDS_WON_PCT%)</td>
+      <td class=\"cell100 stats-medium-column\">$POCKET_PAIR_HANDS_WON_SHOWDOWN ($POCKET_PAIR_HANDS_WON_SHOWDOWN_PCT%)</td>
+    </tr>
   "
   SITE_POCKET_PAIRS_BODY="$SITE_POCKET_PAIRS_BODY $POCKET_PAIR_TR"
 done
@@ -487,6 +518,10 @@ echo ""
 # update site-wide stats
 STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_SITE_STATS_BODY_/$SITE_STATS_TEMPLATE}"
 
+# add player hand rankings
+PLAYER_HANDS_BODY=`tidy --show-body-only yes -indent --indent-spaces 2 -quiet --tidy-mark no -w 200 --vertical-space no <<< $PLAYER_HANDS_BODY`
+STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_PLAYER_HANDS_BODY_/$PLAYER_HANDS_BODY}"
+
 # add player pocket pairs status
 PLAYER_POCKET_PAIRS_BODY=`tidy --show-body-only yes -indent --indent-spaces 2 -quiet --tidy-mark no -w 200 --vertical-space no <<< $PLAYER_POCKET_PAIRS_BODY`
 STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_PLAYER_POCKET_PAIRS_BODY_/$PLAYER_POCKET_PAIRS_BODY}"
@@ -494,10 +529,6 @@ STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_PLAYER_POCKET_PAIRS_BODY_/$PLAYER_POC
 # add holdem hand stats
 TABLE_HAND_STATS_BODY=`tidy --show-body-only yes -indent --indent-spaces 2 -quiet --tidy-mark no -w 200 --vertical-space no <<< $TABLE_HAND_STATS_TEMPLATE`
 STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_TABLE_HAND_STATS_BODY_/$TABLE_HAND_STATS_BODY}"
-
-# add omaha hand stats
-TABLE_HAND_STATS_OMAHA_BODY=`tidy --show-body-only yes -indent --indent-spaces 2 -quiet --tidy-mark no -w 200 --vertical-space no <<< $TABLE_HAND_STATS_OMAHA_TEMPLATE`
-STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_TABLE_HAND_STATS_OMAHA_BODY_/$TABLE_HAND_STATS_OMAHA_BODY}"
 
 # add site pocket pairs
 SITE_POCKET_PAIRS_BODY=`tidy --show-body-only yes -indent --indent-spaces 2 -quiet --tidy-mark no -w 200 --vertical-space no <<< $SITE_POCKET_PAIRS_BODY`
@@ -510,4 +541,5 @@ STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_GENERATED_ON_/$DATE}"
 STATS_HTML_CONTENT="${STATS_HTML_CONTENT//_POKER_SITE_NAME_/$POKER_SITE_NAME}"
 
 # print it to the file
+STATS_HTML_CONTENT=`tidy --indent auto --indent-spaces 2 --quiet yes --show-errors 0 --show-body-only auto --wrap 0 --tidy-mark no <<< $STATS_HTML_CONTENT`
 echo "$STATS_HTML_CONTENT" > web/stats.html

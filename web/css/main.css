@@ -68,9 +68,7 @@ p {margin: 0px;}
 
 ul, li {
 	margin: 0px;
-	list-style-type: none;
 }
-
 
 /* ------------------------------------ */
 input {
@@ -240,9 +238,41 @@ th, td {
   vertical-align: middle;
 }
 
+.stats-glossary-definition-column {
+  width: 70%;
+  padding-left: 40px;
+  padding-right: 40px;
+  text-align: justify;
+  vertical-align: middle;
+}
+
+.stats-huge-column {
+  width: 70%;
+  vertical-align: middle;
+}
+
+.stats-xlarge-column {
+  width: 50%;
+  vertical-align: middle;
+}
+
+.stats-large-column {
+  width: 35%;
+  vertical-align: middle;
+}
+
 .stats-medium-column {
   width: 20%;
-  padding-left: 40px;
+  vertical-align: middle;
+}
+
+.stats-small-column {
+  width: 10%;
+  vertical-align: middle;
+}
+
+.stats-tiny-column {
+  width: 9%;
   vertical-align: middle;
 }
 
@@ -258,13 +288,13 @@ th, td {
 }
 
 .winnings-column-header {
-  width: 25%;
+  width: 20%;
   vertical-align: middle;
   text-align: center
 }
 
 .winnings-cell {
-  width: 25%;
+  width: 20%;
   vertical-align: middle;
   text-align: center
 }
@@ -291,6 +321,23 @@ th, td {
   font-size: 12px;
   vertical-align: middle;
   text-align: center
+}
+
+.registration-column1 {
+  width: 20%;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.registration-column2 {
+  width: 50%;
+  vertical-align: middle;
+}
+
+.registration-column3 {
+  width: 30%;
+  vertical-align: middle;
+  text-align: center;
 }
 
 .table100-head th {
@@ -362,12 +409,20 @@ th, td {
     color:green;
 }
 
+.table100.ver1 span.posPercentage {
+  color:green;
+}
+
 .table100.ver1 span.posMoney::before {
     content:"$";
 }
 
 .table100.ver1 span.negMoney {
     color:red;
+}
+
+.table100.ver1 span.negPercentage {
+  color:red;
 }
 
 .table100.ver1 span.negMoney::before {
@@ -429,6 +484,15 @@ th, td {
   display: block;
 }
 
+
+.smallcaps {
+  font-family: Lato-Bold;
+  font-size: 16px;
+  color: #fff;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
 .generation-date {
   font-family: 'Roboto Mono';
   font-size: 12px;
@@ -439,10 +503,51 @@ th, td {
   background-color: #786798;
 }
 
+.btn  {
+  border-color: #412970 !important;
+  background-color: #786798 !important;
+}
+
 .nav-pills .nav-link {
   color: #412970;
 }
 
 .nav-link.small {
   font-size: 12px;
+}
+
+.fire-text {
+  font-family: “Open Sans”, sans-serif;
+  color: #f5f5f5;
+  text-shadow: 0px -2px 4px #fff, 0px -2px 10px #FF3, 0px -10px 20px #F90, 0px -20px 40px #C33;
+  font-size: 100px;
+}
+
+.fire-image {
+  color: #f5f5f5;
+  box-shadow: 0px -2px 4px #fff, 0px -2px 10px #FF3, 0px -10px 20px #F90, 0px -20px 40px #C33;
+}
+
+.rules-text {
+  text-align: start;
+}
+
+.card-img-top {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  padding: 1.25rem;
+}
+
+.table100.ver1 td.registration-confirmed {
+  color:green;
+}
+
+.table100.ver1 td.registration-maybe {
+  color:darkorange;
+}
+
+.table100.ver1 td.registration-doubtful {
+  color:red;
 }

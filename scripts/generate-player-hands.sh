@@ -3,15 +3,14 @@ DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/common-db.sh"
 
-HANDS=( "A" "K" "Q" "J" "T" "9" "8" "7" "6" "5" "4" "3" "2" )
-
 # now that the databae is done, let's generate HTML
 DATE=`date "+Generated on %B %d, %Y"`
 
 MAX_PLAYERS_PER_COLUMN=19
 
 ALL_PLAYERS_BODY=""
-PLAYER_NAV_BODY="<div class="col-small">"
+BOOTSTRAP_PILL_NAV_DIV="<div class=\"col-small nav flex-column nav-pills\" role=\"tablist\" aria-orientation=\"vertical\" style=\"padding-right:10px\">"
+PLAYER_NAV_BODY="$BOOTSTRAP_PILL_NAV_DIV"
 
 for i in "${!PLAYERS[@]}"; do 
   PLAYER="${PLAYERS[$i]}"
@@ -27,7 +26,7 @@ for i in "${!PLAYERS[@]}"; do
   # create new column
   CURRENT_PLAYER_INDEX=$(expr $i + 1)
   if [[ $(expr $CURRENT_PLAYER_INDEX % $MAX_PLAYERS_PER_COLUMN) -eq 0 ]]; then
-    PLAYER_NAV_BODY="$PLAYER_NAV_BODY </div><div class="col-small">"
+    PLAYER_NAV_BODY="$PLAYER_NAV_BODY </div>$BOOTSTRAP_PILL_NAV_DIV"
   fi
 
   # table body template for this player
@@ -128,8 +127,11 @@ done
 # close last div on the navigation pills
 PLAYER_NAV_BODY="$PLAYER_NAV_BODY </div>"
 
-HTML_CONTENT=$(awk -v r="$PLAYER_NAV_BODY" '{gsub(/_PLAYERS_NAVIGATION_/,r)}1' templates/player-hands.tmpl)
+HTML_CONTENT=$(awk -v r="$PLAYER_NAV_BODY" '{gsub(/_PLAYERS_NAVIGATION_/,r)}1' templates/player-hands.html)
 HTML_CONTENT="${HTML_CONTENT//_PLAYER_HOLE_CARD_BODY_/$ALL_PLAYERS_BODY}"
+
+# replace poker site name
+HTML_CONTENT="${HTML_CONTENT//_POKER_SITE_NAME_/$POKER_SITE_NAME}"
 
 # add generation date
 HTML_CONTENT="${HTML_CONTENT//_GENERATED_ON_/$DATE}"

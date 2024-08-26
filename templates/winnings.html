@@ -2,28 +2,28 @@
 <html lang="en">
 
   <head>
-    <title>_POKER_SITE_NAME_ Winnings</title>
+    <title>_POKER_SITE_NAME_ Cash Stats</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=yes">
-    <link rel="icon" type="image/png" href="images/icons/mobile.png" />
+    <link rel="icon" type="image/png" href="images/icons/mobile.png?v=1.0" />
     <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
     <link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
     <link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
     <link rel="stylesheet" type="text/css" href="css/util.css">
-    <link rel="stylesheet" type="text/css" href="css/main.css?v=1.0.10">
+    <link rel="stylesheet" type="text/css" href="css/main.css?v=1.0.20">
     <link href='https://fonts.googleapis.com/css?family=Roboto Mono' rel='stylesheet'>
   </head>
 
   <body>
     <div class="limiter">
-      <img class="logo" src="images/logo.png" />
+      <img class="logo" src="images/logo.png" alt="_POKER_SITE_NAME_">
 
       <div class="container-table100">
         <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical" style="padding-right:10px">
-          <a class="nav-link active" id="v-pills-tournament-tab" data-toggle="pill" href="#v-pills-tournament" role="tab" aria-controls="v-pills-tournament" aria-selected="true">Tournament</a>
-          <a class="nav-link" id="v-pills-cash-tab" data-toggle="pill" href="#v-pills-cash" role="tab" aria-controls="v-pills-cash" aria-selected="false">Cash</a>
+          <a class="nav-link active" id="v-pills-tournament-tab" data-toggle="pill" data-target="#v-pills-tournament" role="tab" aria-controls="v-pills-tournament" aria-selected="true">Tournament</a>
+          <a class="nav-link" id="v-pills-cash-tab" data-toggle="pill" data-target="#v-pills-cash" role="tab" aria-controls="v-pills-cash" aria-selected="false">Cash</a>
         </div>
 
         <div class="wrap-table50">
@@ -38,6 +38,7 @@
                         <th class="cell100 winnings-column-header">Winnings</th>
                         <th class="cell100 winnings-column-header">Profit</th>
                         <th class="cell100 winnings-column-header">Cashes</th>
+                        <th class="cell100 winnings-column-header">ROI</th>
                       </tr>
                     </thead>
                   </table>
@@ -59,8 +60,9 @@
                   <table>
                     <thead>
                       <tr class="row100 head">
-                        <th class="cell100 stats-column1">Player</th>
-                        <th class="cell100 stats-column2">Profit</th>
+                        <th class="cell100 winnings-column-header">Player</th>
+                        <th class="cell100 winnings-column-header">Profit</th>
+                        <th class="cell100 winnings-column-header">PPH (100)</th>
                       </tr>
                     </thead>
                   </table>
@@ -80,21 +82,11 @@
         </div>
       </div>
     </div>
-    <script src="vendor/jquery/jquery-3.2.1.min.js"></script>
-    <script src="vendor/bootstrap/js/popper.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="vendor/jquery/jquery.slim.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="vendor/select2/select2.min.js"></script>
     <script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
-    <script>
-      $('.js-pscroll').each(function () {
-        var ps = new PerfectScrollbar(this);
-
-        $(window).on('resize', function () {
-          ps.update();
-        })
-      });
-    </script>
-    <script src="js/main.js?v=1.0.6"></script>
+    <script src="js/main.js?v=1.0.21"></script>
 
   </body>
 

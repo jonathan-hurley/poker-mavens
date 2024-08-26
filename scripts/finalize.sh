@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # cleanup time
 echo ""
 echo "=========   FINALIZING   ========="

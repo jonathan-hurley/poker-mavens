@@ -26,6 +26,10 @@
 
 $('* span.currency').each(function () {
 	var item = $(this).text();
+	if (item == "(redacted)") {
+		return
+	}
+
 	var num = formatCurrency(Number(item))
 
 	if (Number(item) == 0) {
@@ -38,8 +42,7 @@ $('* span.currency').each(function () {
 		$(this).addClass('posMoney');
 	}
 
-	num =
-		$(this).text(num);
+	num = $(this).text(num);
 });
 
 function formatCurrency(value) {
@@ -54,3 +57,30 @@ function formatCurrency(value) {
 	result = result.replace(/[\$]/i, "").trim()
 	return result
 }
+
+$('.js-pscroll').each(function () {
+	var ps = new PerfectScrollbar(this);
+
+	$(window).on('resize', function () {
+		ps.update();
+	})
+});
+
+$('* span.percentage').each(function () {
+	var item = $(this).text();
+	if (item == "(redacted)") {
+		return
+	}
+
+	var decimal = Number(item/100)
+	var num = decimal.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}); 
+
+	if (Number(item) < 0) {
+		$(this).addClass('negPercentage');
+	} else {
+		$(this).addClass('posPercentage');
+	}
+	
+	num = $(this).text(num);
+});
+

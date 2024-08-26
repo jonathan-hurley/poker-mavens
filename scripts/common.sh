@@ -30,7 +30,7 @@ then
 fi
 
 # ensure that command we use are available on the path
-requiredCommands=( grep ggrep -E bc sed tidy sqlite3 )
+requiredCommands=( grep bc sed tidy sqlite3 )
 for requiredCommandName in "${requiredCommands[@]}"
 do
   command -v $requiredCommandName &> /dev/null
@@ -64,6 +64,9 @@ export GREP_FILE_PATTERN_LOG="$LOG_TEMP_DIR/*"
 export GREP_FILE_PATTERN_ALL="$ALL_HANDS_SYNC_TEMP_DIR/*"
 export GREP_FILE_PATTERN_TOURNAMENT_RESULTS="$TOURNEY_RESULTS_TEMP_DIR/*"
 
+# the array of hands to create combinations for
+export HANDS=( "A" "K" "Q" "J" "T" "9" "8" "7" "6" "5" "4" "3" "2" )
+
 # calculates the average position that a player finishes the tournament
 # for tournaments with re-entry, we have to use tail -1 in order to only take the last entry
 function calculatePlayerAverageTournmanentFinish(){
@@ -71,10 +74,10 @@ function calculatePlayerAverageTournmanentFinish(){
 
   TOTAL_FINISHES=0
   SUM_FINISH_POSITION=0
-  TOURNAMENT_FILES=$(ggrep -E -l "Place[0-9]+=$PLAYER " $PM_DATA_TOURNEY_DIR/*)  
+  TOURNAMENT_FILES=$(grep -E -l "Place[0-9]+=$PLAYER " $PM_DATA_TOURNEY_DIR/*)  
   while read -r TOURNAMENT_FILE; do
     # find the player's finish position
-    FINISH_POSITION=`ggrep -E -oh "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | tail -1 | ggrep -E -oh "Place[0-9]+=" | ggrep -E -o "[0-9]+" | sed -e 's/^[[:space:]]*//'`
+    FINISH_POSITION=`grep -E -oh "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | tail -1 | grep -E -oh "Place[0-9]+=" | grep -E -o "[0-9]+" | sed -e 's/^[[:space:]]*//'`
     if [[ -z $FINISH_POSITION ]]; then      
       continue
     fi
@@ -83,10 +86,10 @@ function calculatePlayerAverageTournmanentFinish(){
 
     # see if there were mulitple finishes
     # first find the place (Place1=)
-    FINISH_POSITION_SUBSTRING=`ggrep -E -oh "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | tail -1 | ggrep -E -oh "Place[0-9]+="`
+    FINISH_POSITION_SUBSTRING=`grep -E -oh "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | tail -1 | grep -E -oh "Place[0-9]+="`
 
     # now find the number of finishes in that position (1 or 2 or 3)
-    FINISH_POSITIONS_SPLIT_COUNT=`ggrep -E -oh "$FINISH_POSITION_SUBSTRING" "$TOURNAMENT_FILE" | wc -l | sed -e 's/^[[:space:]]*//'`
+    FINISH_POSITIONS_SPLIT_COUNT=`grep -E -oh "$FINISH_POSITION_SUBSTRING" "$TOURNAMENT_FILE" | wc -l | sed -e 's/^[[:space:]]*//'`
     if [[ $FINISH_POSITIONS_SPLIT_COUNT -gt 1 ]]; then
       splitSum=0
       counter=1      
@@ -116,4 +119,14 @@ function getYesterday() {
   fi
 
   echo "$YESTERDAY"
+}
+
+# gets the player's display name if it exists, or returns the original argument
+function getPlayerName() {
+  PLAYER_NAME=$1
+  if [ ${PLAYER_NAME_MAPPINGS[$PLAYER_NAME]+_} ]; then
+    PLAYER_NAME=${PLAYER_NAME_MAPPINGS[$PLAYER_NAME]}
+  fi
+
+  echo $PLAYER_NAME
 }

@@ -139,6 +139,61 @@ function getPocketPairStatFromDB() {
   echo $RESULT
 }
 
+# gets the player with the most cash winnings
+function getMostCashWinningsFromDB() {
+  SQL="SELECT name, MAX(cash_winnings) FROM player_summary"  
+  result=`executeSQL "$SQL"`
+  readarray -td '|' arr < <(printf '%s' "$result")
+  player_name="${arr[0]}"
+  value="${arr[1]}"
+  player_name=`getPlayerName $player_name`
+  echo "$player_name <span class=\"badge badge-light currency\">$value</span>"
+}
+
+# gets the player with the most tournament gross winnings
+function getMostTournamentWinningsFromDB() {
+  SQL="SELECT name, MAX(tournament_gross_winnings) FROM player_summary"  
+  result=`executeSQL "$SQL"`
+  readarray -td '|' arr < <(printf '%s' "$result")
+  player_name="${arr[0]}"
+  value="${arr[1]}"
+  player_name=`getPlayerName $player_name`
+  echo "$player_name <span class=\"badge badge-light currency\">$value</span>"
+}
+
+# gets the player with the most tournament cashes
+function getMostTournamentCashesFromDB() {
+  SQL="SELECT name, MAX(tournament_cashes) FROM player_summary"  
+  result=`executeSQL "$SQL"`
+  readarray -td '|' arr < <(printf '%s' "$result")
+  player_name="${arr[0]}"
+  value="${arr[1]}"
+  player_name=`getPlayerName $player_name`
+  echo "$player_name <span class=\"badge badge-primary\">$value</span>"
+}
+
+# gets the player with the most tournament wins
+function getMostTournamentWinsFromDB() {
+  SQL="SELECT name, MAX(tournament_wins) FROM player_summary"  
+  result=`executeSQL "$SQL"`
+  readarray -td '|' arr < <(printf '%s' "$result")
+  player_name="${arr[0]}"
+  value="${arr[1]}"
+  player_name=`getPlayerName $player_name`
+  echo "$player_name <span class=\"badge badge-primary\">$value</span>"
+}
+
+# gets the player with the most tournament chops
+function getMostTournamentChopsFromDB() {
+  SQL="SELECT name, MAX(tournament_chops) FROM player_summary"  
+  result=`executeSQL "$SQL"`
+  readarray -td '|' arr < <(printf '%s' "$result")
+  player_name="${arr[0]}"
+  value="${arr[1]}"
+  player_name=`getPlayerName $player_name`
+  echo "$player_name <span class=\"badge badge-primary\">$value</span>"
+}
+
 # checks the specified table to see if the user exists, and creates a blank record if they don't
 # assumes the column is called "name"
 function insertPlayerIfNotExists(){
@@ -254,8 +309,8 @@ function copyFilesSinceLastSync() {
   # copy PM files out to directories for easier grep'ing
   grep -l "Starting tournament\|finishes tournament in place" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $TOURNMANENT_TEMP_DIR
   grep -L "Starting tournament\|finishes tournament in place" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $CASH_TEMP_DIR
-  ggrep -E -l -m 1 "Game: (.*?)Hold'em" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $HOLDEM_TEMP_DIR
-  ggrep -E -l -m 1 "Game: (.*?)Omaha" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $OMAHA_TEMP_DIR  
+  grep -E -l -m 1 "Game: (.*?)Hold'em" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $HOLDEM_TEMP_DIR
+  grep -E -l -m 1 "Game: (.*?)Omaha" $ALL_HANDS_SYNC_TEMP_DIR/* | xargs -r -d "\n" cp -t $OMAHA_TEMP_DIR  
 }
 
 # gets the player cash total, including the offset, from the database
@@ -284,6 +339,32 @@ function updateLastSync() {
   setSitePropertyInDB "last_sync" "$TODAY"
 }
 
+# updates the counts of player hand rankings
+function updatePlayerHandRankings() {
+  PLAYER=$1
+
+  PLAYER_ROYAL_FLUSHES=$(grep -E -he "$PLAYER shows.*Royal" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//')
+  PLAYER_ROYAL_FLUSHES=$(incrementPlayerStatInDB "$PLAYER" "royal_flush" $PLAYER_ROYAL_FLUSHES)
+  PLAYER_STRAIGHT_FLUSH=$(grep -E -he "$PLAYER shows.*Straight Flush" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//')
+  PLAYER_STRAIGHT_FLUSH=$(incrementPlayerStatInDB "$PLAYER" "straight_flush" $PLAYER_STRAIGHT_FLUSH)
+  PLAYER_QUADS=$(grep -E -he "$PLAYER shows.*Four of a Kind" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//')
+  PLAYER_QUADS=$(incrementPlayerStatInDB "$PLAYER" "four_of_a_kind" $PLAYER_QUADS)
+  PLAYER_FULL_HOUSE=$(grep -E -he "$PLAYER shows.*Full House" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//')
+  PLAYER_FULL_HOUSE=$(incrementPlayerStatInDB "$PLAYER" "full_house" $PLAYER_FULL_HOUSE)
+  PLAYER_FLUSH=$(grep -E -he "$PLAYER shows.*Flush" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//')
+  PLAYER_FLUSH=$(incrementPlayerStatInDB "$PLAYER" "flush" $PLAYER_FLUSH)
+  PLAYER_STRAIGHT=$(grep -E -he "$PLAYER shows.*Straight" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//')
+  PLAYER_STRAIGHT=$(incrementPlayerStatInDB "$PLAYER" "straight" $PLAYER_STRAIGHT)
+  PLAYER_THREE_KIND=$(grep -E -he "$PLAYER shows.*Three of a Kind" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//')
+  PLAYER_THREE_KIND=$(incrementPlayerStatInDB "$PLAYER" "three_of_a_kind" $PLAYER_THREE_KIND)
+  PLAYER_TWO_PAIR=$(grep -E -he "$PLAYER shows.*Two Pair" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//')
+  PLAYER_TWO_PAIR=$(incrementPlayerStatInDB "$PLAYER" "two_pair" $PLAYER_TWO_PAIR)
+  PLAYER_PAIR=$(grep -E -he "$PLAYER shows.*a Pair" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//')
+  PLAYER_PAIR=$(incrementPlayerStatInDB "$PLAYER" "pair" $PLAYER_PAIR)
+  PLAYER_HIGH_CARD=$(grep -E -he "$PLAYER shows.*High Card" $GREP_FILE_PATTERN_HOLDEM | wc -l | sed -e 's/^[[:space:]]*//')
+  PLAYER_HIGH_CARD=$(incrementPlayerStatInDB "$PLAYER" "high_card" $PLAYER_HIGH_CARD)  
+}
+
 # updates the amount of money a player has spent on buy-ins and rebuys for all tournaments entered
 function updatePlayerBuyInTotal(){
   PLAYER=$1
@@ -291,7 +372,7 @@ function updatePlayerBuyInTotal(){
   TOTAL=0
   GROSS_TOTAL=0
   
-  TOURNAMENT_FILES=$(ggrep -E -l "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS)
+  TOURNAMENT_FILES=$(grep -E -l "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS)
 
   # if there are no tournament files then bail
   if [[ -z $TOURNAMENT_FILES ]]; then
@@ -300,12 +381,12 @@ function updatePlayerBuyInTotal(){
   fi  
 
   while read -r TOURNAMENT_FILE; do
-    BUY_IN=`ggrep -E -h "BuyIn" "$TOURNAMENT_FILE" | ggrep -E -oe "[0-9|.]+\+[0-9]+" | awk '{s+=$1} END {print s}' | bc`
+    BUY_IN=`grep -E -h "BuyIn" "$TOURNAMENT_FILE" | grep -E -oe "[0-9|.]+\+[0-9]+" | awk '{s+=$1} END {print s}' | bc`
     if [[ -z $BUY_IN ]]; then
       BUY_IN=0
     fi
 
-    REBUYS=`ggrep -E -h "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | ggrep -E -oe "Rebuys:[0-9]+" | tr -d 'Rebuys:'`
+    REBUYS=`grep -E -h "Place[0-9]+=$PLAYER " "$TOURNAMENT_FILE" | grep -E -oe "Rebuys:[0-9]+" | tr -d 'Rebuys:'`
     if [[ -z $REBUYS ]]; then
       REBUYS=0
     fi
@@ -321,20 +402,48 @@ function updatePlayerBuyInTotal(){
 # also handles bounties of the form ($0+$0)
 function updatePlayerNumberOfCashes(){
   PLAYER=$1
-  NUMBER_OF_CASHES=$(ggrep -E -h "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | ggrep -E -oe "\(.*\)" | ggrep -E -v "\(0\)|\(0\+0\)" | tr -d '()' | wc -l | sed -e 's/^[[:space:]]*//')
+  NUMBER_OF_CASHES=$(grep -E -h "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | grep -E -oe "\(.*\)" | grep -E -v "\(0\)|\(0\+0\)" | tr -d '()' | wc -l | sed -e 's/^[[:space:]]*//')
   if [[ -z $NUMBER_OF_CASHES ]]; then
     NUMBER_OF_CASHES=0
   fi
 
   TOTAL_NUMBER_OF_CASHES=$(incrementPlayerStatInDB "$PLAYER" "tournament_cashes" $NUMBER_OF_CASHES)
-  echo "           Tournament # of Cashes increased by $NUMBER_OF_CASHES since last sync (Total: $TOTAL_NUMBER_OF_CASHES)"
+  echo "           Tournament # of cashes increased by $NUMBER_OF_CASHES since last sync (Total: $TOTAL_NUMBER_OF_CASHES)"
+}
+
+# uses tourney history to get player wins
+# also handles bounties of the form ($0+$0)
+# this uses pcregrep since \n can't be found by GNU grep
+function updatePlayerNumberOfWins(){
+  PLAYER=$1
+  NUMBER_OF_WINS=$(pcregrep -M -h "Place2=(.|\n)*Place1=$PLAYER" $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | grep -E "Place1=$PLAYER" | tr -d '()' | wc -l | sed -e 's/^[[:space:]]*//')
+  if [[ -z $NUMBER_OF_WINS ]]; then
+    NUMBER_OF_WINS=0
+  fi
+
+  TOTAL_NUMBER_OF_WINS=$(incrementPlayerStatInDB "$PLAYER" "tournament_wins" $NUMBER_OF_WINS)
+  echo "           Tournament # of wins increased by $NUMBER_OF_WINS since last sync (Total: $TOTAL_NUMBER_OF_WINS)"
+}
+
+# uses tourney history to get player chops
+# also handles bounties of the form ($0+$0)
+# this uses pcregrep since \n can't be found by GNU grep
+function updatePlayerNumberOfChops(){
+  PLAYER=$1
+  NUMBER_OF_CHOPS=$(pcregrep -M -h "Place1=(.)*?\nPlace1=(.|\n)*?Abort?" $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | grep -E "Place1=$PLAYER" | tr -d '()' | wc -l | sed -e 's/^[[:space:]]*//')
+  if [[ -z $NUMBER_OF_CHOPS ]]; then
+    NUMBER_OF_CHOPS=0
+  fi
+
+  TOTAL_NUMBER_OF_CHOPS=$(incrementPlayerStatInDB "$PLAYER" "tournament_chops" $NUMBER_OF_CHOPS)
+  echo "           Tournament # of chops increased by $NUMBER_OF_CHOPS since last sync (Total: $TOTAL_NUMBER_OF_CHOPS)"
 }
 
 # uses tourney history to get player winnings
 # also handles bounties of the form ($0+$0)
 function updatePlayerTournamentWinnings(){
   PLAYER=$1
-  TOURNAMENT_WINNINGS=$(ggrep -E -h "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | ggrep -E -oe "\(.*\)" | tr -d '()' | bc | awk '{s+=$1}END{print s}')
+  TOURNAMENT_WINNINGS=$(grep -E -h "Place[0-9]+=$PLAYER " $GREP_FILE_PATTERN_TOURNAMENT_RESULTS | grep -E -oe "\(.*\)" | tr -d '()' | bc | awk '{s+=$1}END{print s}')
 
   if [[ -z $TOURNAMENT_WINNINGS ]]; then
     TOURNAMENT_WINNINGS=0
@@ -357,7 +466,7 @@ function updatePlayerCashTotal(){
   # We used to use the search by game name (ie Sizzler) but can't do that anymore since we want other games to show up
   # This file also works around the "incremental update" issue on a single file by piping results through awk to compare dates
   # from the last time the sync ran
-  PLAYER_CASH_CHANGE=$(ggrep -E -h "House\|Ring.*\($PLAYER .*\)" $GREP_FILE_PATTERN_LOG | awk "\$0 > \"$LAST_SYNC_DATE\"" | ggrep -E -oe "House\|Ring.*balance" | ggrep -E -oe "[-|+][0-9]+(\.[0-9]+)?" | awk '{s+=$1*-1} END {print s}')
+  PLAYER_CASH_CHANGE=$(grep -E -h "House\|Ring.*\($PLAYER .*\)" $GREP_FILE_PATTERN_LOG | awk "\$0 > \"$LAST_SYNC_DATE\"" | grep -E -oe "House\|Ring.*balance" | grep -E -oe "[-|+][0-9]+(\.[0-9]+)?" | awk '{s+=$1*-1} END {print s}')
   if [[ -z $PLAYER_CASH_CHANGE ]]; then
     PLAYER_CASH_CHANGE=0
   fi
@@ -407,4 +516,29 @@ function getPokerMavensFormattedDateOfLastSync() {
   fi
 
   echo "$LASY_SYNC_DATE_ONLY"
+}
+
+# stores site hand stats in the DB for all holdem cards
+function syncSiteHandStats() {
+  for FIRST_CARD in "${HANDS[@]}"
+  do
+    for SECOND_CARD in "${HANDS[@]}"
+    do
+      # matches (+2000) (+2.50) and (+0.25) but NOT (+0)
+      SITE_CARDS_TOTAL_WINS=$(grep -E -h "^Seat.* (\((\+[1-9]+.*)\)|\((\+0\..*)\)) \[$FIRST_CARD\w $SECOND_CARD\w\]" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//')
+      SITE_CARDS_WINS_NO_SHOWDOWN=$(grep -E -h "^Seat.* (\((\+[1-9]+.*)\)|\((\+0\..*)\)) \[$FIRST_CARD\w $SECOND_CARD\w\] Won without" $GREP_FILE_PATTERN_ALL | wc -l | sed -e 's/^[[:space:]]*//')
+      SITE_CARDS_WINS_AT_SHOWDOWN=$[SITE_CARDS_TOTAL_WINS - SITE_CARDS_WINS_NO_SHOWDOWN]
+
+      UPDATE_HAND_STAT_SQL="UPDATE site_hands SET cards_$FIRST_CARD$SECOND_CARD = cards_$FIRST_CARD$SECOND_CARD + $SITE_CARDS_TOTAL_WINS WHERE statistic = 'total_wins'"
+      executeSQL "$UPDATE_HAND_STAT_SQL"
+
+      UPDATE_HAND_STAT_SQL="UPDATE site_hands SET cards_$FIRST_CARD$SECOND_CARD = cards_$FIRST_CARD$SECOND_CARD + $SITE_CARDS_WINS_NO_SHOWDOWN WHERE statistic = 'wins_no_showdown'"
+      executeSQL "$UPDATE_HAND_STAT_SQL"
+      
+      UPDATE_HAND_STAT_SQL="UPDATE site_hands SET cards_$FIRST_CARD$SECOND_CARD = cards_$FIRST_CARD$SECOND_CARD + $SITE_CARDS_WINS_AT_SHOWDOWN WHERE statistic = 'wins_at_showdown'"
+      executeSQL "$UPDATE_HAND_STAT_SQL"
+
+      echo "Processed hand [$FIRST_CARD $SECOND_CARD]: total=$(printf "%'d" $SITE_CARDS_TOTAL_WINS) total without showdown=$(printf "%'d" $SITE_CARDS_WINS_NO_SHOWDOWN) total with showdown=$(printf "%'d" $SITE_CARDS_WINS_AT_SHOWDOWN)"
+    done
+  done
 }

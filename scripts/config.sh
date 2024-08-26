@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# the name of the poker site
-POKER_SITE_NAME="Your Poker Club"
+# the name of the poker site if not already set
+POKER_SITE_NAME=${POKER_SITE_NAME:-"Your Poker Club"}
 
 # POKER_MAVENS_HOME_DIR=
 case "$(uname -s)" in

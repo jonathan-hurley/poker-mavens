@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Table Statistics</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=yes">
+  <link rel="icon" type="image/png" href="images/icons/mobile.png?v=1.0" >
+  <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+  <link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+  <link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
+  <link rel="stylesheet" type="text/css" href="css/util.css">
+  <link rel="stylesheet" type="text/css" href="css/main.css?v=1.0.20">
+  <link href='https://fonts.googleapis.com/css?family=Roboto Mono' rel='stylesheet'>
+</head>
+
+<body>
+  <div class="limiter">
+    <img class="logo" src="images/logo.png" alt="_POKER_SITE_NAME_">
+
+    <div class="container-table100">
+      <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical" style="padding-right:10px">
+        <a class="nav-link active" id="v-pills-table-stats-tab" data-toggle="pill" data-target="#v-pills-table-stats" role="tab" aria-controls="v-pills-table-stats" aria-selected="true">Table Statistics</a>
+        <a class="nav-link" id="v-pills-table-pots-tab" data-toggle="pill" data-target="#v-pills-table-pots" role="tab" aria-controls="v-pills-table-pots">Table Pots</a>
+        <a class="nav-link" id="v-pills-table-top5-tab" data-toggle="pill" data-target="#v-pills-table-top5" role="tab" aria-controls="v-pills-table-top5">Top 5</a>
+      </div>
+
+      <div class="wrap-table50" style="width: 80%;"">
+        <div class="tab-content" id="v-pills-tabContent">
+          <div class="tab-pane fade show active" id="v-pills-table-stats" role="tabpanel" aria-labelledby="v-pills-table-stats-tab">
+            <div class="table100 ver1 m-b-50">
+              <div class="table100-head">
+                <table>
+                  <thead>
+                    <tr class="row100 head">
+                      <th class="cell100 stats-small-column">Table</th>
+                      <th class="cell100 stats-tiny-column">Avg Pot</th>
+                      <th class="cell100 stats-tiny-column">Median Pot</th>
+                      <th class="cell100 stats-tiny-column">Max Pot</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+              <div class="table100-body js-pscroll">
+                <table>
+                  <tbody>
+                    {tableStatistics}
+                    <!-- footer -->
+                    <tr class="row100 body">
+                      <td class="cell100 stats-small-column"></td>
+                      <td class="cell100 stats-tiny-column"></td>
+                      <td class="cell100 stats-tiny-column"></td>
+                      <td class="cell100 stats-tiny-column"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="v-pills-table-pots" role="tabpanel" aria-labelledby="v-pills-table-pots-tab">
+            <div class="table100 ver1 m-b-50">
+              <div class="table100-head">
+                <table>
+                  <thead>
+                    <tr class="row100 head">
+                      <th class="cell100 stats-small-column">Table</th>
+                      <th class="cell100 stats-small-column">Hands</th>
+                      <th class="cell100 stats-tiny-column">Max Pot</th>
+                      <th class="cell100 stats-tiny-column">Max Win</th>
+                      <th class="cell100 stats-small-column">Player</th>
+                      <th class="cell100 stats-tiny-column">Cards</th>
+                      <th class="cell100 stats-tiny-column">Max Loss</th>
+                      <th class="cell100 stats-small-column">Player</th>
+                      <th class="cell100 stats-tiny-column">Cards</th>
+                      <th class="cell100 stats-small-column">Hand ID</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+              <div class="table100-body js-pscroll">
+                <table>
+                  <tbody>
+                    {tablePots}
+                    <!-- footer -->
+                    <tr class="row100 body">
+                      <td class="cell100 stats-small-column"></td>
+                      <td class="cell100 stats-small-column"></td>
+                      <td class="cell100 stats-tiny-column"></td>
+                      <td class="cell100 stats-tiny-column"></td>
+                      <td class="cell100 stats-small-column"></td>
+                      <td class="cell100 stats-tiny-column"></td>
+                      <td class="cell100 stats-tiny-column"></td>
+                      <td class="cell100 stats-small-column"></td>
+                      <td class="cell100 stats-tiny-column"></td>
+                      <td class="cell100 stats-small-column"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="v-pills-table-top5" role="tabpanel" aria-labelledby="v-pills-table-top5-tab">
+            <div class="table100 ver1 m-b-50">
+              <div class="table100-head">
+                <table>
+                  <thead>
+                    <tr class="row100 head">
+                      <th class="cell100 stats-small-column">Table</th>
+                      <th class="cell100 stats-tiny-column">Max Pot</th>
+                      <th class="cell100 stats-tiny-column">Max Win</th>
+                      <th class="cell100 stats-small-column">Player</th>
+                      <th class="cell100 stats-tiny-column">Cards</th>
+                      <th class="cell100 stats-tiny-column">Max Loss</th>
+                      <th class="cell100 stats-small-column">Player</th>
+                      <th class="cell100 stats-tiny-column">Cards</th>
+                      <th class="cell100 stats-small-column">Hand ID</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+              <div class="table100-body js-pscroll">
+                <table>
+                  <tbody>
+                    {tableTopFive}
+                    <!-- footer -->
+                    <tr class="row100 body">
+                      <td class="cell100 stats-small-column"></td>
+                      <td class="cell100 stats-tiny-column"></td>
+                      <td class="cell100 stats-tiny-column"></td>
+                      <td class="cell100 stats-small-column"></td>
+                      <td class="cell100 stats-tiny-column"></td>
+                      <td class="cell100 stats-tiny-column"></td>
+                      <td class="cell100 stats-small-column"></td>
+                      <td class="cell100 stats-tiny-column"></td>
+                      <td class="cell100 stats-small-column"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="generation-date">{generationDate}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="vendor/jquery/jquery.slim.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="vendor/select2/select2.min.js"></script>
+  <script src="vendor/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+  <script src="js/main.js?v=1.0.21"></script>
+
+</body>
+</html>
